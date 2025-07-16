@@ -12,20 +12,24 @@ import mill.contrib.flyway.FlywayModule
 import ba.sake.mill.openapi4s.OpenApiGeneratorModule
 import ba.sake.mill.squery.generator.SqueryGeneratorModule
 
-object api extends ScalaModule,FlywayModule,SqueryGeneratorModule,  OpenApiGeneratorModule {
+object api extends ScalaModule, FlywayModule, SqueryGeneratorModule, OpenApiGeneratorModule {
 
   def scalaVersion = "3.7.1"
 
   def mvnDeps = Seq(
     mvn"ba.sake::sharaf-undertow:0.13.0",
+    mvn"ba.sake::squery:0.10.0",
+    mvn"com.h2database:h2:2.3.232",
     mvn"org.webjars:swagger-ui:5.20.1"
   )
 
-  def flywayDriverDeps = Seq(mvn"com.h2database:h2:2.3.232")
-  def flywayUrl = "jdbc:h2:./h2_db"
+  def dbFilePath = moduleDir / "h2_db"
 
-  def squeryJdbcUrl = "jdbc:h2:./h2_db"
-  def squerySchemaMappings = Seq("PUBLIC" -> "public")
+  def flywayDriverDeps = Seq(mvn"com.h2database:h2:2.3.232")
+  def flywayUrl = s"jdbc:h2:file:${dbFilePath}"
+
+  def squeryJdbcUrl = s"jdbc:h2:file:${dbFilePath}"
+  def squerySchemaMappings = Seq("PUBLIC" -> "com.example.petstore.db")
   def squeryJdbcDeps = Seq(mvn"com.h2database:h2:2.3.232")
 
   def openApi4sPackage = "com.example.petstore.api"
