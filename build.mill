@@ -1,6 +1,6 @@
 //| mill-version: 1.0.0
 //| mvnDeps:
-//| - "ba.sake::mill-openapi4s::0.5.0-DIRTY86388607"
+//| - "ba.sake::mill-openapi4s::0.6.0-DIRTYd76344d5"
 
 package build
 
@@ -8,18 +8,19 @@ import mill.*
 import mill.scalalib.*
 import ba.sake.mill.openapi4s.OpenApiGeneratorModule
 
-object api extends ScalaModule with OpenApiGeneratorModule {
+object api extends ScalaModule, OpenApiGeneratorModule {
 
   def scalaVersion = "3.7.1"
 
   def mvnDeps = Seq(
-    mvn"ba.sake::sharaf:0.9.3",
+    mvn"ba.sake::sharaf-undertow:0.13.0",
     mvn"org.webjars:swagger-ui:5.20.1"
   )
 
-  def openApi4sPackage = Task("com.example.petstore.api")
+  def openApi4sPackage = "com.example.petstore.api"
+  def openApi4sVersion = "0.6.1"
   
-  // public so we can expose it with SwaggerUI
+  // public so we can expose it with sharaf and SwaggerUI
   def openApi4sFile = Task.Source(moduleDir / "resources/public/openapi.json")
 
 }
