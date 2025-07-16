@@ -1,14 +1,18 @@
 //| mill-version: 1.0.0
 //| mvnDeps:
-//| - "ba.sake::mill-openapi4s::0.6.0-DIRTYd76344d5"
+//| - "com.lihaoyi::mill-contrib-flyway:1.0.0"
+//| - "ba.sake::mill-openapi4s::0.7.0"
+//| - "ba.sake::mill-squery-generator::0.10.0"
 
 package build
 
 import mill.*
 import mill.scalalib.*
+import mill.contrib.flyway.FlywayModule
 import ba.sake.mill.openapi4s.OpenApiGeneratorModule
+import ba.sake.mill.squery.generator.SqueryGeneratorModule
 
-object api extends ScalaModule, OpenApiGeneratorModule {
+object api extends ScalaModule,FlywayModule,SqueryGeneratorModule,  OpenApiGeneratorModule {
 
   def scalaVersion = "3.7.1"
 
@@ -17,9 +21,15 @@ object api extends ScalaModule, OpenApiGeneratorModule {
     mvn"org.webjars:swagger-ui:5.20.1"
   )
 
+  def flywayDriverDeps = Seq(mvn"com.h2database:h2:2.3.232")
+  def flywayUrl = "jdbc:h2:./h2_db"
+
+  def squeryJdbcUrl = "jdbc:h2:./h2_db"
+  def squerySchemaMappings = Seq("PUBLIC" -> "public")
+  def squeryJdbcDeps = Seq(mvn"com.h2database:h2:2.3.232")
+
   def openApi4sPackage = "com.example.petstore.api"
   def openApi4sVersion = "0.6.1"
-  
   // public so we can expose it with sharaf and SwaggerUI
   def openApi4sFile = Task.Source(moduleDir / "resources/public/openapi.json")
 
