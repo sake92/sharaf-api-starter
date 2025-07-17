@@ -16,7 +16,7 @@ import com.example.petclinic.ui.controllers.SwaggerUIController
       FailingController().routes,
       OwnerController().routes,
       PetController(dbCtx).routes,
-      PettypesController().routes,
+      PettypesController(dbCtx).routes,
       SpecialtyController().routes,
       UserController().routes,
       VetController().routes,
