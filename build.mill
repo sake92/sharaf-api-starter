@@ -33,10 +33,10 @@ object api extends ScalaModule, FlywayModule, SqueryGeneratorModule, OpenApiGene
   def flywayUrl = jdbcUrl()
 
   def squeryJdbcUrl = jdbcUrl()
-  def squerySchemaMappings = Seq("PUBLIC" -> "com.example.petstore.db")
+  def squerySchemaMappings = Seq("PUBLIC" -> "com.example.petclinic.db")
   def squeryJdbcDeps = Seq(mvn"com.h2database:h2:2.3.232")
 
-  def openApi4sPackage = "com.example.petstore.api"
+  def openApi4sPackage = "com.example.petclinic.api"
   def openApi4sVersion = "0.6.3"
   // public so we can expose it with sharaf and SwaggerUI
   def openApi4sFile = Task.Source(moduleDir / "resources/public/openapi.yaml")
