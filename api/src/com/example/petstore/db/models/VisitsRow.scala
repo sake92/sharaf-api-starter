@@ -17,5 +17,6 @@ object VisitsRow {
   }
   type PK = Int
 }
-case class VisitsRow(ID: Int, PET_ID: Option[Int], VISIT_DATE: Option[LocalDate], DESCRIPTION: Option[String])
-    derives SqlReadRow { def pk: VisitsRow.PK = ID }
+case class VisitsRow(ID: Int, PET_ID: Int, VISIT_DATE: LocalDate, DESCRIPTION: String) derives SqlReadRow {
+  def pk: VisitsRow.PK = ID
+}

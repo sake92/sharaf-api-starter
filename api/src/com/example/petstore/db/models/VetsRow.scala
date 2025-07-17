@@ -16,6 +16,4 @@ object VetsRow {
   }
   type PK = Int
 }
-case class VetsRow(ID: Int, FIRST_NAME: Option[String], LAST_NAME: Option[String]) derives SqlReadRow {
-  def pk: VetsRow.PK = ID
-}
+case class VetsRow(ID: Int, FIRST_NAME: String, LAST_NAME: String) derives SqlReadRow { def pk: VetsRow.PK = ID }

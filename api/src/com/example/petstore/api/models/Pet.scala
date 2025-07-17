@@ -5,26 +5,27 @@ import java.util.UUID
 import org.typelevel.jawn.ast.JValue
 import ba.sake.tupson.*
 import ba.sake.validson.Validator
-import com.example.petstore.db.models.PetsRow
+import com.example.petstore.db.models.*
 
 case class Pet(
-    id: Option[Long],
     name: String,
-    category: Option[Category],
-    photoUrls: Seq[String],
-    tags: Option[Seq[Tag]],
-    status: Option[PetStatus]
+    birthDate: LocalDate,
+    `type`: PetType,
+    id: Int,
+    ownerId: Option[Int],
+    visits: Seq[Visit]
 ) derives JsonRW
 
 object Pet {
-  def fromRow(row: PetsRow): Pet = Pet(
-    id = Some(row.ID),
-    name = row.NAME.getOrElse(""),
-    category = None,
-    photoUrls = Seq.empty,
-    tags = None,
-    status = None
-  )
-}
+  given Validator[Pet] = Validator.derived[Pet].maxLength(_.name, 30).min(_.id, 0)
 
-enum PetStatus derives JsonRW { case available, pending, sold }
+  def fromRow(row: PetsRow, petType: TypesRow, visits: Seq[VisitsRow]): Pet =
+    Pet(
+      name = row.NAME,
+      birthDate = row.BIRTH_DATE,
+      `type` = PetType.fromRow(petType),
+      id = row.ID,
+      ownerId = Some(row.OWNER_ID),
+      visits = visits.map(Visit.fromRow)
+    )
+}

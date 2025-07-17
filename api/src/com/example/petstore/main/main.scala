@@ -1,12 +1,11 @@
 package com.example.petstore.main
 
+import org.h2.jdbcx.JdbcDataSource
+import ba.sake.squery.SqueryContext
 import ba.sake.sharaf.*
 import ba.sake.sharaf.undertow.UndertowSharafServer
 import com.example.petstore.api.controllers.*
 import com.example.petstore.ui.controllers.SwaggerUIController
-import java.nio.file.Paths
-import ba.sake.squery.SqueryContext
-import org.h2.jdbcx.JdbcDataSource
 
 @main def apiMain =
   val ds = JdbcDataSource()
@@ -14,9 +13,14 @@ import org.h2.jdbcx.JdbcDataSource
   val dbCtx = SqueryContext(ds)
   val routes = Routes.merge(
     Seq(
-      UserController().routes,
+      FailingController().routes,
+      OwnerController().routes,
       PetController(dbCtx).routes,
-      StoreController().routes,
+      PettypesController().routes,
+      SpecialtyController().routes,
+      UserController().routes,
+      VetController().routes,
+      VisitController().routes,
       SwaggerUIController().routes
     )
   )

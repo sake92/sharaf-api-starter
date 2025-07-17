@@ -1,49 +1,54 @@
 package com.example.petstore.api.controllers
+
 import java.time.*
 import java.util.UUID
 import sttp.model.StatusCode
 import ba.sake.querson.QueryStringRW
 import ba.sake.validson.Validator
 import ba.sake.sharaf.*, routing.*
+import ba.sake.squery.{*, given}
+import ba.sake.squery.utils.*
 import com.example.petstore.api.models.*
-import ba.sake.squery.SqueryContext
-import com.example.petstore.db.daos.PetsDao
-import com.example.petstore.db.models.PetsRow
+import com.example.petstore.db.models.*
+import com.example.petstore.db.daos.*
 
 class PetController(dbCtx: SqueryContext) {
   def routes = Routes {
-    case PUT -> Path("pet") =>
-      val reqBody = Request.current.bodyJsonValidated[Pet]
+    case POST -> Path("owners", param[Int](ownerId), "pets") =>
+      val reqBody = Request.current.bodyJsonValidated[PetFields]
       Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Pet")
-    case POST -> Path("pet") =>
-      val reqBody = Request.current.bodyJsonValidated[Pet]
-      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Pet")
-    case GET -> Path("pet", "findByStatus") =>
-      enum QpStatus derives QueryStringRW { case available, pending, sold }
-      case class QP(status: Option[QpStatus]) derives QueryStringRW
-      val qp = Request.current.queryParamsValidated[QP]
-      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Seq[Pet]")
-    case GET -> Path("pet", "findByTags") =>
-      case class QP(tags: Option[Seq[String]]) derives QueryStringRW
-      val qp = Request.current.queryParamsValidated[QP]
-      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Seq[Pet]")
-    case GET -> Path("pet", param[Long](petId)) =>
+    case GET -> Path("owners", param[Int](ownerId), "pets", param[Int](petId)) =>
       dbCtx.run {
-        PetsDao.findByIdOpt(petId.toInt) match
-          case Some(petRow) => 
-            val pet = Pet.fromRow(petRow)
+        val rows = sql"""
+          SELECT ${PetsRow.allColsWithPrefix("p")},
+                 ${TypesRow.allColsWithPrefix("t")},
+                 ${VisitsRow.allColsWithPrefix("v")}
+          FROM ${PetsRow.tableName} p
+          JOIN ${TypesRow.tableName} t ON p.TYPE_ID = t.ID
+          LEFT JOIN ${VisitsRow.tableName} v ON v.PET_ID = p.ID
+          WHERE p.ID = $petId AND p.OWNER_ID = $ownerId
+        """.readRows[PetAndVisitsRow]()
+
+        val res = rows.groupByOrderedOpt(r => (r.p, r.t), _.v)
+        res.headOption match {
+          case Some(((p, t), visitsRows)) =>
+            val pet = Pet.fromRow(p, t, visitsRows.toSeq)
             Response.withStatus(StatusCode.Ok).withBody(pet)
-          case None => Response.withStatus(StatusCode.NotFound).withBody(s"Pet with id $petId not found")
+          case None =>
+            Response.withStatus(StatusCode.NotFound).withBody(s"Pet with id $petId not found for owner $ownerId")
+        }
       }
-    case POST -> Path("pet", param[Long](petId)) =>
-      case class QP(name: Option[String], status: Option[String]) derives QueryStringRW
-      val qp = Request.current.queryParamsValidated[QP]
+    case PUT -> Path("owners", param[Int](ownerId), "pets", param[Int](petId)) =>
+      val reqBody = Request.current.bodyJsonValidated[PetFields]
       Response.withStatus(StatusCode.NotImplemented)
-    case DELETE -> Path("pet", param[Long](petId)) =>
-      Response.withStatus(StatusCode.NotImplemented)
-    case POST -> Path("pet", param[Long](petId), "uploadImage") =>
-      case class QP(additionalMetadata: Option[String]) derives QueryStringRW
-      val qp = Request.current.queryParamsValidated[QP]
-      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return ApiResponse")
+    case GET -> Path("pets") =>
+      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Seq[Pet]")
+    case GET -> Path("pets", param[Int](petId)) =>
+      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Pet")
+    case PUT -> Path("pets", param[Int](petId)) =>
+      val reqBody = Request.current.bodyJsonValidated[Pet]
+      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Pet")
+    case DELETE -> Path("pets", param[Int](petId)) =>
+      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Pet")
   }
 }

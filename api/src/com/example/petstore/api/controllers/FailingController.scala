@@ -6,9 +6,8 @@ import ba.sake.querson.QueryStringRW
 import ba.sake.validson.Validator
 import ba.sake.sharaf.*, routing.*
 import com.example.petstore.api.models.*
-class UserController {
-  def routes = Routes { case POST -> Path("users") =>
-    val reqBody = Request.current.bodyJsonValidated[User]
-    Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return User")
+class FailingController {
+  def routes = Routes { case GET -> Path("oops") =>
+    Response.withStatus(StatusCode.NotImplemented)
   }
 }

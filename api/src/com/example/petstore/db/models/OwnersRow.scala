@@ -19,11 +19,5 @@ object OwnersRow {
   }
   type PK = Int
 }
-case class OwnersRow(
-    ID: Int,
-    FIRST_NAME: Option[String],
-    LAST_NAME: Option[String],
-    ADDRESS: Option[String],
-    CITY: Option[String],
-    TELEPHONE: Option[String]
-) derives SqlReadRow { def pk: OwnersRow.PK = ID }
+case class OwnersRow(ID: Int, FIRST_NAME: String, LAST_NAME: String, ADDRESS: String, CITY: String, TELEPHONE: String)
+    derives SqlReadRow { def pk: OwnersRow.PK = ID }

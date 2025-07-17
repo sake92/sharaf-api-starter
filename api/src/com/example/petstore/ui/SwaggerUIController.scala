@@ -29,7 +29,7 @@ class SwaggerUIController() {
           <script>
           window.onload = function() {
             window.ui = SwaggerUIBundle({
-              url: "${baseUrl}/openapi.json",
+              url: "${baseUrl}/openapi.yaml",
               dom_id: '#swagger-ui',
               deepLinking: true,
               presets: [

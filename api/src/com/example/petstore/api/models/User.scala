@@ -4,13 +4,6 @@ import java.util.UUID
 import org.typelevel.jawn.ast.JValue
 import ba.sake.tupson.*
 import ba.sake.validson.Validator
-case class User(
-    id: Option[Long],
-    username: Option[String],
-    firstName: Option[String],
-    lastName: Option[String],
-    email: Option[String],
-    password: Option[String],
-    phone: Option[String],
-    userStatus: Option[Int]
-) derives JsonRW
+case class User(username: String, password: Option[String], enabled: Option[Boolean], roles: Option[Seq[Role]])
+    derives JsonRW
+object User { given Validator[User] = Validator.derived[User].minLength(_.username, 1).maxLength(_.username, 80) }

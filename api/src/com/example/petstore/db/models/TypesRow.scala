@@ -15,4 +15,4 @@ object TypesRow {
   }
   type PK = Int
 }
-case class TypesRow(ID: Int, NAME: Option[String]) derives SqlReadRow { def pk: TypesRow.PK = ID }
+case class TypesRow(ID: Int, NAME: String) derives SqlReadRow { def pk: TypesRow.PK = ID }
