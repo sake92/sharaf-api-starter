@@ -11,6 +11,7 @@ import mill.scalalib.*
 import mill.contrib.flyway.FlywayModule
 import ba.sake.mill.openapi4s.OpenApiGeneratorModule
 import ba.sake.mill.squery.generator.SqueryGeneratorModule
+import mill.api.Task.Simple
 
 object api extends ScalaModule, FlywayModule, SqueryGeneratorModule, OpenApiGeneratorModule {
 
@@ -18,17 +19,20 @@ object api extends ScalaModule, FlywayModule, SqueryGeneratorModule, OpenApiGene
 
   def mvnDeps = Seq(
     mvn"ba.sake::sharaf-undertow:0.13.0",
-    mvn"ba.sake::squery:0.10.0",
+    mvn"ba.sake::squery:0.8.1",
     mvn"com.h2database:h2:2.3.232",
     mvn"org.webjars:swagger-ui:5.20.1"
   )
 
   def dbFilePath = moduleDir / "h2_db"
+  def jdbcUrl = Task(s"jdbc:h2:file:${dbFilePath.toString}")
+
+  def forkEnv = Map("JDBC_URL" -> jdbcUrl())
 
   def flywayDriverDeps = Seq(mvn"com.h2database:h2:2.3.232")
-  def flywayUrl = s"jdbc:h2:file:${dbFilePath}"
+  def flywayUrl = jdbcUrl()
 
-  def squeryJdbcUrl = s"jdbc:h2:file:${dbFilePath}"
+  def squeryJdbcUrl = jdbcUrl()
   def squerySchemaMappings = Seq("PUBLIC" -> "com.example.petstore.db")
   def squeryJdbcDeps = Seq(mvn"com.h2database:h2:2.3.232")
 

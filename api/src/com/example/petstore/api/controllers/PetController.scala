@@ -6,7 +6,11 @@ import ba.sake.querson.QueryStringRW
 import ba.sake.validson.Validator
 import ba.sake.sharaf.*, routing.*
 import com.example.petstore.api.models.*
-class PetController {
+import ba.sake.squery.SqueryContext
+import com.example.petstore.db.daos.PetsDao
+import com.example.petstore.db.models.PetsRow
+
+class PetController(dbCtx: SqueryContext) {
   def routes = Routes {
     case PUT -> Path("pet") =>
       val reqBody = Request.current.bodyJsonValidated[Pet]
@@ -24,7 +28,13 @@ class PetController {
       val qp = Request.current.queryParamsValidated[QP]
       Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Seq[Pet]")
     case GET -> Path("pet", param[Long](petId)) =>
-      Response.withStatus(StatusCode.NotImplemented).withBody("TODO: return Pet")
+      dbCtx.run {
+        PetsDao.findByIdOpt(petId.toInt) match
+          case Some(petRow) => 
+            val pet = Pet.fromRow(petRow)
+            Response.withStatus(StatusCode.Ok).withBody(pet)
+          case None => Response.withStatus(StatusCode.NotFound).withBody(s"Pet with id $petId not found")
+      }
     case POST -> Path("pet", param[Long](petId)) =>
       case class QP(name: Option[String], status: Option[String]) derives QueryStringRW
       val qp = Request.current.queryParamsValidated[QP]
