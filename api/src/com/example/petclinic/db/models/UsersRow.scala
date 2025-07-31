@@ -10,12 +10,13 @@ object UsersRow {
   inline val username = "USERNAME"
   inline val password = "PASSWORD"
   inline val enabled = "ENABLED"
-  inline val allCols = "USERNAME, PASSWORD, ENABLED"
+  inline val firstName = "FIRST_NAME"
+  inline val allCols = "USERNAME, PASSWORD, ENABLED, FIRST_NAME"
   transparent inline def allColsWithPrefix(inline prefix: String) = {
-    prefix + ".USERNAME" + "," + (prefix + ".PASSWORD") + "," + (prefix + ".ENABLED")
+    prefix + ".USERNAME" + "," + (prefix + ".PASSWORD") + "," + (prefix + ".ENABLED") + "," + (prefix + ".FIRST_NAME")
   }
   type PK = String
 }
-case class UsersRow(USERNAME: String, PASSWORD: String, ENABLED: Boolean) derives SqlReadRow {
+case class UsersRow(USERNAME: String, PASSWORD: String, ENABLED: Boolean, FIRST_NAME: Option[String]) derives SqlReadRow {
   def pk: UsersRow.PK = USERNAME
 }
