@@ -6,7 +6,7 @@ import scala.util.Random
 import sttp.model.StatusCode
 import ba.sake.querson.QueryStringRW
 import ba.sake.validson.Validator
-import ba.sake.sharaf.*
+import ba.sake.sharaf.*, routing.*
 import ba.sake.squery.{*, given}
 import ba.sake.squery.utils.*
 import com.example.petclinic.api.models.*

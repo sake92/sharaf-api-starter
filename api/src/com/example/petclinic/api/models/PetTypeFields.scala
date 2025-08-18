@@ -9,8 +9,5 @@ import ba.sake.validson.Validator
 case class PetTypeFields(name: String) derives JsonRW
 
 object PetTypeFields {
-  given Validator[PetTypeFields] = Validator
-    .derived[PetTypeFields]
-    .minLength(_.name, 1)
-    .maxLength(_.name, 80)
+  given Validator[PetTypeFields] = Validator.derived[PetTypeFields].minLength(_.name, 1).maxLength(_.name, 80)
 }
