@@ -8,6 +8,7 @@ info:
   version: '1.0'
 servers:
   - url: http://localhost:8080
+
 tags:
   - name: failing
     description: Endpoint which always returns an error.

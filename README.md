@@ -10,15 +10,15 @@ Openapi and db schema are taken from https://github.com/spring-petclinic/spring-
 ```shell
 
 # creates db and populates it with some data
-./mill -i api.flywayMigrate
+./mill api.flywayMigrate
 
 # generate db boilerplate source code
-./mill -i api.squeryGenerate
+./mill api.squeryGenerate
 
 # generate api boilerplate source code
-./mill -i api.openApi4sGenerate
+./mill api.openApi4sGenerate
 
 # format source code
-./mill -i mill.scalalib.scalafmt/
+./mill mill.scalalib.scalafmt/
 
 ```
