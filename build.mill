@@ -35,6 +35,7 @@ object api extends ScalaModule, FlywayModule, SqueryGeneratorModule, OpenApiGene
   def squeryJdbcUrl = jdbcUrl()
   def squerySchemaMappings = Seq("PUBLIC" -> "com.example.petclinic.db")
   def squeryJdbcDeps = Seq(mvn"com.h2database:h2:2.3.232")
+  def squeryVersion = "0.8.1-3-958ed8-DIRTY2e1d8844"
 
   def openApi4sPackage = "com.example.petclinic.api"
   def openApi4sVersion = "0.6.4"
