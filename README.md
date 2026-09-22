@@ -7,18 +7,25 @@ This is an api starter project for [Sharaf](https://github.com/sake92/sharaf) th
 
 Openapi and db schema are taken from https://github.com/spring-petclinic/spring-petclinic-rest .
 
+## Development
+
+The project uses sbt 2 and requires JDK 17 or newer. The current build uses
+locally published `sbt-squery` and `sbt-openapi4s` `0.1.0-SNAPSHOT` plugins.
+
 ```shell
+# Create the local H2 database and populate it with sample data
+sbt flywayMigrate
 
-# creates db and populates it with some data
-./mill api.flywayMigrate
+# Generate database models and DAOs
+sbt squeryGenerate
 
-# generate db boilerplate source code
-./mill api.squeryGenerate
+# Generate API models and controllers
+sbt openApi4sGenerate
 
-# generate api boilerplate source code
-./mill api.openApi4sGenerate
+# Format Scala and sbt sources
+sbt scalafmtAll
 
-# format source code
-./mill mill.scalalib.scalafmt/
-
+# Compile and run the API
+sbt compile
+sbt run
 ```

@@ -23,8 +23,8 @@ class UsersDao {
   def findByIdOpt(id: UsersRow.PK): DbAction[Option[UsersRow]] =
     sql"SELECT USERNAME, PASSWORD, ENABLED FROM PUBLIC.USERS WHERE USERNAME = $id".readRowOpt()
   def findByIds(ids: Set[UsersRow.PK]): DbAction[Seq[UsersRow]] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"SELECT USERNAME, PASSWORD, ENABLED FROM PUBLIC.USERS WHERE USERNAME IN ($idsExpr)".readRows()
+    val idsExpr = Query.in(ids)
+    sql"SELECT USERNAME, PASSWORD, ENABLED FROM PUBLIC.USERS WHERE USERNAME IN $idsExpr".readRows()
   }
   def insert(row: UsersRow): DbAction[Int] = sql"""INSERT INTO PUBLIC.USERS(USERNAME, PASSWORD, ENABLED) 
 VALUES (
@@ -36,7 +36,7 @@ SET PASSWORD = ${row.PASSWORD}, ENABLED = ${row.ENABLED}
   def deleteWhere(whereQuery: Query): DbAction[Int] = sql"DELETE FROM PUBLIC.USERS WHERE $whereQuery".update()
   def deleteById(id: UsersRow.PK): DbAction[Int] = sql"DELETE FROM PUBLIC.USERS WHERE USERNAME = $id".update()
   def deleteByIds(ids: Set[UsersRow.PK]): DbAction[Int] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"DELETE FROM PUBLIC.USERS WHERE USERNAME IN ($idsExpr)".update()
+    val idsExpr = Query.in(ids)
+    sql"DELETE FROM PUBLIC.USERS WHERE USERNAME IN $idsExpr".update()
   }
 }

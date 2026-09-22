@@ -22,12 +22,12 @@ class TypesDao {
   def findByIdOpt(id: TypesRow.PK): DbAction[Option[TypesRow]] =
     sql"SELECT ID, NAME FROM PUBLIC.TYPES WHERE ID = $id".readRowOpt()
   def findByIds(ids: Set[TypesRow.PK]): DbAction[Seq[TypesRow]] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"SELECT ID, NAME FROM PUBLIC.TYPES WHERE ID IN ($idsExpr)".readRows()
+    val idsExpr = Query.in(ids)
+    sql"SELECT ID, NAME FROM PUBLIC.TYPES WHERE ID IN $idsExpr".readRows()
   }
-  def insert(row: TypesRow): DbAction[Int] = sql"""INSERT INTO PUBLIC.TYPES(ID, NAME) 
+  def insert(row: TypesRow): DbAction[Int] = sql"""INSERT INTO PUBLIC.TYPES(NAME)
 VALUES (
-      ${row.ID},${row.NAME}    
+      ${row.NAME}
 )""".insert()
   def updateById(row: TypesRow): DbAction[Int] = sql"""UPDATE PUBLIC.TYPES 
 SET NAME = ${row.NAME}
@@ -35,7 +35,7 @@ SET NAME = ${row.NAME}
   def deleteWhere(whereQuery: Query): DbAction[Int] = sql"DELETE FROM PUBLIC.TYPES WHERE $whereQuery".update()
   def deleteById(id: TypesRow.PK): DbAction[Int] = sql"DELETE FROM PUBLIC.TYPES WHERE ID = $id".update()
   def deleteByIds(ids: Set[TypesRow.PK]): DbAction[Int] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"DELETE FROM PUBLIC.TYPES WHERE ID IN ($idsExpr)".update()
+    val idsExpr = Query.in(ids)
+    sql"DELETE FROM PUBLIC.TYPES WHERE ID IN $idsExpr".update()
   }
 }

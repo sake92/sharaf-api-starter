@@ -24,12 +24,12 @@ class VisitsDao {
   def findByIdOpt(id: VisitsRow.PK): DbAction[Option[VisitsRow]] =
     sql"SELECT ID, PET_ID, VISIT_DATE, DESCRIPTION FROM PUBLIC.VISITS WHERE ID = $id".readRowOpt()
   def findByIds(ids: Set[VisitsRow.PK]): DbAction[Seq[VisitsRow]] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"SELECT ID, PET_ID, VISIT_DATE, DESCRIPTION FROM PUBLIC.VISITS WHERE ID IN ($idsExpr)".readRows()
+    val idsExpr = Query.in(ids)
+    sql"SELECT ID, PET_ID, VISIT_DATE, DESCRIPTION FROM PUBLIC.VISITS WHERE ID IN $idsExpr".readRows()
   }
-  def insert(row: VisitsRow): DbAction[Int] = sql"""INSERT INTO PUBLIC.VISITS(ID, PET_ID, VISIT_DATE, DESCRIPTION) 
+  def insert(row: VisitsRow): DbAction[Int] = sql"""INSERT INTO PUBLIC.VISITS(PET_ID, VISIT_DATE, DESCRIPTION)
 VALUES (
-      ${row.ID},${row.PET_ID},${row.VISIT_DATE},${row.DESCRIPTION}    
+      ${row.PET_ID},${row.VISIT_DATE},${row.DESCRIPTION}
 )""".insert()
   def updateById(row: VisitsRow): DbAction[Int] = sql"""UPDATE PUBLIC.VISITS 
 SET PET_ID = ${row.PET_ID}, VISIT_DATE = ${row.VISIT_DATE}, DESCRIPTION = ${row.DESCRIPTION}
@@ -37,7 +37,7 @@ SET PET_ID = ${row.PET_ID}, VISIT_DATE = ${row.VISIT_DATE}, DESCRIPTION = ${row.
   def deleteWhere(whereQuery: Query): DbAction[Int] = sql"DELETE FROM PUBLIC.VISITS WHERE $whereQuery".update()
   def deleteById(id: VisitsRow.PK): DbAction[Int] = sql"DELETE FROM PUBLIC.VISITS WHERE ID = $id".update()
   def deleteByIds(ids: Set[VisitsRow.PK]): DbAction[Int] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"DELETE FROM PUBLIC.VISITS WHERE ID IN ($idsExpr)".update()
+    val idsExpr = Query.in(ids)
+    sql"DELETE FROM PUBLIC.VISITS WHERE ID IN $idsExpr".update()
   }
 }

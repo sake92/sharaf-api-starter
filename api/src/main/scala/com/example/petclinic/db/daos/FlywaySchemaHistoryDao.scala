@@ -30,8 +30,8 @@ class FlywaySchemaHistoryDao {
     sql"SELECT installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success FROM PUBLIC.flyway_schema_history WHERE installed_rank = $id"
       .readRowOpt()
   def findByIds(ids: Set[FlywaySchemaHistoryRow.PK]): DbAction[Seq[FlywaySchemaHistoryRow]] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"SELECT installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success FROM PUBLIC.flyway_schema_history WHERE installed_rank IN ($idsExpr)"
+    val idsExpr = Query.in(ids)
+    sql"SELECT installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success FROM PUBLIC.flyway_schema_history WHERE installed_rank IN $idsExpr"
       .readRows()
   }
   def insert(row: FlywaySchemaHistoryRow): DbAction[Int] =
@@ -47,7 +47,7 @@ SET version = ${row.version}, description = ${row.description}, type = ${row.`ty
   def deleteById(id: FlywaySchemaHistoryRow.PK): DbAction[Int] =
     sql"DELETE FROM PUBLIC.flyway_schema_history WHERE installed_rank = $id".update()
   def deleteByIds(ids: Set[FlywaySchemaHistoryRow.PK]): DbAction[Int] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"DELETE FROM PUBLIC.flyway_schema_history WHERE installed_rank IN ($idsExpr)".update()
+    val idsExpr = Query.in(ids)
+    sql"DELETE FROM PUBLIC.flyway_schema_history WHERE installed_rank IN $idsExpr".update()
   }
 }

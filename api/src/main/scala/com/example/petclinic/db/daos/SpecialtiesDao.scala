@@ -23,12 +23,12 @@ class SpecialtiesDao {
   def findByIdOpt(id: SpecialtiesRow.PK): DbAction[Option[SpecialtiesRow]] =
     sql"SELECT ID, NAME FROM PUBLIC.SPECIALTIES WHERE ID = $id".readRowOpt()
   def findByIds(ids: Set[SpecialtiesRow.PK]): DbAction[Seq[SpecialtiesRow]] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"SELECT ID, NAME FROM PUBLIC.SPECIALTIES WHERE ID IN ($idsExpr)".readRows()
+    val idsExpr = Query.in(ids)
+    sql"SELECT ID, NAME FROM PUBLIC.SPECIALTIES WHERE ID IN $idsExpr".readRows()
   }
-  def insert(row: SpecialtiesRow): DbAction[Int] = sql"""INSERT INTO PUBLIC.SPECIALTIES(ID, NAME) 
+  def insert(row: SpecialtiesRow): DbAction[Int] = sql"""INSERT INTO PUBLIC.SPECIALTIES(NAME)
 VALUES (
-      ${row.ID},${row.NAME}    
+      ${row.NAME}
 )""".insert()
   def updateById(row: SpecialtiesRow): DbAction[Int] = sql"""UPDATE PUBLIC.SPECIALTIES 
 SET NAME = ${row.NAME}
@@ -36,7 +36,7 @@ SET NAME = ${row.NAME}
   def deleteWhere(whereQuery: Query): DbAction[Int] = sql"DELETE FROM PUBLIC.SPECIALTIES WHERE $whereQuery".update()
   def deleteById(id: SpecialtiesRow.PK): DbAction[Int] = sql"DELETE FROM PUBLIC.SPECIALTIES WHERE ID = $id".update()
   def deleteByIds(ids: Set[SpecialtiesRow.PK]): DbAction[Int] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"DELETE FROM PUBLIC.SPECIALTIES WHERE ID IN ($idsExpr)".update()
+    val idsExpr = Query.in(ids)
+    sql"DELETE FROM PUBLIC.SPECIALTIES WHERE ID IN $idsExpr".update()
   }
 }

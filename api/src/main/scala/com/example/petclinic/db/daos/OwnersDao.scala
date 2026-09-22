@@ -24,13 +24,13 @@ class OwnersDao {
   def findByIdOpt(id: OwnersRow.PK): DbAction[Option[OwnersRow]] =
     sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE ID = $id".readRowOpt()
   def findByIds(ids: Set[OwnersRow.PK]): DbAction[Seq[OwnersRow]] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE ID IN ($idsExpr)".readRows()
+    val idsExpr = Query.in(ids)
+    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE ID IN $idsExpr".readRows()
   }
   def insert(row: OwnersRow): DbAction[Int] =
-    sql"""INSERT INTO PUBLIC.OWNERS(ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE) 
+    sql"""INSERT INTO PUBLIC.OWNERS(FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE)
 VALUES (
-      ${row.ID},${row.FIRST_NAME},${row.LAST_NAME},${row.ADDRESS},${row.CITY},${row.TELEPHONE}    
+      ${row.FIRST_NAME},${row.LAST_NAME},${row.ADDRESS},${row.CITY},${row.TELEPHONE}
 )""".insert()
   def updateById(row: OwnersRow): DbAction[Int] = sql"""UPDATE PUBLIC.OWNERS 
 SET FIRST_NAME = ${row.FIRST_NAME}, LAST_NAME = ${row.LAST_NAME}, ADDRESS = ${row.ADDRESS}, CITY = ${row.CITY}, TELEPHONE = ${row.TELEPHONE}
@@ -38,7 +38,7 @@ SET FIRST_NAME = ${row.FIRST_NAME}, LAST_NAME = ${row.LAST_NAME}, ADDRESS = ${ro
   def deleteWhere(whereQuery: Query): DbAction[Int] = sql"DELETE FROM PUBLIC.OWNERS WHERE $whereQuery".update()
   def deleteById(id: OwnersRow.PK): DbAction[Int] = sql"DELETE FROM PUBLIC.OWNERS WHERE ID = $id".update()
   def deleteByIds(ids: Set[OwnersRow.PK]): DbAction[Int] = {
-    val idsExpr = ids.map(id => sql"${id}").reduce(_ ++ (sql",") ++ _)
-    sql"DELETE FROM PUBLIC.OWNERS WHERE ID IN ($idsExpr)".update()
+    val idsExpr = Query.in(ids)
+    sql"DELETE FROM PUBLIC.OWNERS WHERE ID IN $idsExpr".update()
   }
 }
