@@ -4,17 +4,17 @@ import java.util.UUID
 import ba.sake.squery.{*, given}
 import ba.sake.squery.read.{*, given}
 import ba.sake.squery.write.{*, given}
-import ba.sake.squery.h2.{*, given}
+import ba.sake.squery.postgres.{*, given}
 object VetSpecialtiesRow {
-  inline val tableName = "PUBLIC.VET_SPECIALTIES"
-  inline val vetId = "VET_ID"
-  inline val specialtyId = "SPECIALTY_ID"
-  inline val allCols = "VET_ID, SPECIALTY_ID"
+  inline val tableName = "public.vet_specialties"
+  inline val vetId = "vet_id"
+  inline val specialtyId = "specialty_id"
+  inline val allCols = "vet_id, specialty_id"
   transparent inline def allColsWithPrefix(inline prefix: String) = {
-    prefix + ".VET_ID" + "," + (prefix + ".SPECIALTY_ID")
+    prefix + ".vet_id" + "," + (prefix + ".specialty_id")
   }
   case class PK()
 }
-case class VetSpecialtiesRow(VET_ID: Int, SPECIALTY_ID: Int) derives SqlReadRow {
+case class VetSpecialtiesRow(vet_id: Int, specialty_id: Int) derives SqlReadRow {
   def pk: VetSpecialtiesRow.PK = VetSpecialtiesRow.PK()
 }

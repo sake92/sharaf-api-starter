@@ -4,41 +4,42 @@ import java.util.UUID
 import ba.sake.squery.{*, given}
 import ba.sake.squery.read.{*, given}
 import ba.sake.squery.write.{*, given}
-import ba.sake.squery.h2.{*, given}
+import ba.sake.squery.postgres.{*, given}
 import com.example.petclinic.db.models.*
 object OwnersDao extends OwnersDao
 class OwnersDao {
-  def countAll(): DbAction[Int] = sql"SELECT COUNT(*) FROM PUBLIC.OWNERS".readValue()
+  def countAll(): DbAction[Int] = sql"SELECT COUNT(*) FROM public.owners".readValue()
   def countWhere(whereQuery: Query): DbAction[Int] =
-    sql"SELECT COUNT(*) FROM PUBLIC.OWNERS WHERE $whereQuery".readValue()
+    sql"SELECT COUNT(*) FROM public.owners WHERE $whereQuery".readValue()
   def findAll(): DbAction[Seq[OwnersRow]] =
-    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS".readRows()
+    sql"SELECT id, first_name, last_name, address, city, telephone FROM public.owners".readRows()
   def findAllWhere(whereQuery: Query): DbAction[Seq[OwnersRow]] =
-    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE $whereQuery".readRows()
+    sql"SELECT id, first_name, last_name, address, city, telephone FROM public.owners WHERE $whereQuery".readRows()
   def findWhere(whereQuery: Query): DbAction[OwnersRow] =
-    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE $whereQuery".readRow()
+    sql"SELECT id, first_name, last_name, address, city, telephone FROM public.owners WHERE $whereQuery".readRow()
   def findWhereOpt(whereQuery: Query): DbAction[Option[OwnersRow]] =
-    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE $whereQuery".readRowOpt()
+    sql"SELECT id, first_name, last_name, address, city, telephone FROM public.owners WHERE $whereQuery".readRowOpt()
   def findById(id: OwnersRow.PK): DbAction[OwnersRow] =
-    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE ID = $id".readRow()
+    sql"SELECT id, first_name, last_name, address, city, telephone FROM public.owners WHERE id = $id".readRow()
   def findByIdOpt(id: OwnersRow.PK): DbAction[Option[OwnersRow]] =
-    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE ID = $id".readRowOpt()
+    sql"SELECT id, first_name, last_name, address, city, telephone FROM public.owners WHERE id = $id".readRowOpt()
   def findByIds(ids: Set[OwnersRow.PK]): DbAction[Seq[OwnersRow]] = {
     val idsExpr = Query.in(ids)
-    sql"SELECT ID, FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE FROM PUBLIC.OWNERS WHERE ID IN $idsExpr".readRows()
+    sql"SELECT id, first_name, last_name, address, city, telephone FROM public.owners WHERE id IN $idsExpr".readRows()
   }
-  def insert(row: OwnersRow): DbAction[Int] =
-    sql"""INSERT INTO PUBLIC.OWNERS(FIRST_NAME, LAST_NAME, ADDRESS, CITY, TELEPHONE)
-VALUES (
-      ${row.FIRST_NAME},${row.LAST_NAME},${row.ADDRESS},${row.CITY},${row.TELEPHONE}
-)""".insert()
-  def updateById(row: OwnersRow): DbAction[Int] = sql"""UPDATE PUBLIC.OWNERS 
-SET FIRST_NAME = ${row.FIRST_NAME}, LAST_NAME = ${row.LAST_NAME}, ADDRESS = ${row.ADDRESS}, CITY = ${row.CITY}, TELEPHONE = ${row.TELEPHONE}
-    WHERE ID = ${row.ID}""".update()
-  def deleteWhere(whereQuery: Query): DbAction[Int] = sql"DELETE FROM PUBLIC.OWNERS WHERE $whereQuery".update()
-  def deleteById(id: OwnersRow.PK): DbAction[Int] = sql"DELETE FROM PUBLIC.OWNERS WHERE ID = $id".update()
+  def insert(row: OwnersRow): DbAction[OwnersRow] =
+    sql"""INSERT INTO public.owners(first_name, last_name, address, city, telephone)
+    VALUES (
+      ${row.first_name},${row.last_name},${row.address},${row.city},${row.telephone}
+    )
+    RETURNING id, first_name, last_name, address, city, telephone""".insertReturningRow()
+  def updateById(row: OwnersRow): DbAction[Int] = sql"""UPDATE public.owners
+SET first_name = ${row.first_name}, last_name = ${row.last_name}, address = ${row.address}, city = ${row.city}, telephone = ${row.telephone}
+    WHERE id = ${row.id}""".update()
+  def deleteWhere(whereQuery: Query): DbAction[Int] = sql"DELETE FROM public.owners WHERE $whereQuery".update()
+  def deleteById(id: OwnersRow.PK): DbAction[Int] = sql"DELETE FROM public.owners WHERE id = $id".update()
   def deleteByIds(ids: Set[OwnersRow.PK]): DbAction[Int] = {
     val idsExpr = Query.in(ids)
-    sql"DELETE FROM PUBLIC.OWNERS WHERE ID IN $idsExpr".update()
+    sql"DELETE FROM public.owners WHERE id IN $idsExpr".update()
   }
 }

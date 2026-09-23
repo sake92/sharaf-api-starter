@@ -4,16 +4,16 @@ import java.util.UUID
 import ba.sake.squery.{*, given}
 import ba.sake.squery.read.{*, given}
 import ba.sake.squery.write.{*, given}
-import ba.sake.squery.h2.{*, given}
+import ba.sake.squery.postgres.{*, given}
 object RolesRow {
-  inline val tableName = "PUBLIC.ROLES"
-  inline val id = "ID"
-  inline val username = "USERNAME"
-  inline val role = "ROLE"
-  inline val allCols = "ID, USERNAME, ROLE"
+  inline val tableName = "public.roles"
+  inline val id = "id"
+  inline val username = "username"
+  inline val role = "role"
+  inline val allCols = "id, username, role"
   transparent inline def allColsWithPrefix(inline prefix: String) = {
-    prefix + ".ID" + "," + (prefix + ".USERNAME") + "," + (prefix + ".ROLE")
+    prefix + ".id" + "," + (prefix + ".username") + "," + (prefix + ".role")
   }
   type PK = Int
 }
-case class RolesRow(ID: Int, USERNAME: String, ROLE: String) derives SqlReadRow { def pk: RolesRow.PK = ID }
+case class RolesRow(id: Int, username: String, role: String) derives SqlReadRow { def pk: RolesRow.PK = id }

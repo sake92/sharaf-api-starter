@@ -15,9 +15,9 @@ object Visit {
 
   def fromRow(row: VisitsRow): Visit =
     Visit(
-      date = Option(row.VISIT_DATE),
-      description = row.DESCRIPTION,
-      id = row.ID,
-      petId = Option(row.PET_ID)
+      date = Option(row.visit_date),
+      description = row.description,
+      id = row.id,
+      petId = Option(row.pet_id)
     )
 }

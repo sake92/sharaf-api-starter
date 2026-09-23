@@ -24,9 +24,9 @@ class PetController(dbCtx: SqueryContext) {
                  ${TypesRow.allColsWithPrefix("t")},
                  ${VisitsRow.allColsWithPrefix("v")}
           FROM ${PetsRow.tableName} p
-          JOIN ${TypesRow.tableName} t ON p.TYPE_ID = t.ID
-          LEFT JOIN ${VisitsRow.tableName} v ON v.PET_ID = p.ID
-          WHERE p.ID = $petId AND p.OWNER_ID = $ownerId
+          JOIN ${TypesRow.tableName} t ON p.type_id = t.id
+          LEFT JOIN ${VisitsRow.tableName} v ON v.pet_id = p.id
+          WHERE p.id = $petId AND p.owner_id = $ownerId
         """.readRows[PetAndVisitsRow]()
 
         val res = rows.groupByOrderedOpt(r => (r.p, r.t), _.v)

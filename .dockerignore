@@ -1,0 +1,11 @@
+.git
+.idea
+.bloop
+.metals
+.bsp
+.vscode
+.scala-build
+out
+**/target
+*.log
+.env

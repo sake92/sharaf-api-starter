@@ -2,7 +2,6 @@ package com.example.petclinic.api.controllers
 
 import java.time.*
 import java.util.UUID
-import scala.util.Random
 import sttp.model.StatusCode
 import ba.sake.querson.QueryStringRW
 import ba.sake.validson.Validator
@@ -30,10 +29,7 @@ class PettypesController(dbCtx: SqueryContext) {
     case POST -> Path("pettypes") =>
       val reqBody = Request.current.bodyJsonValidated[PetTypeFields]
       val newRow = dbCtx.run {
-        // TODO better support in squery for auto-generated IDs
-        val row = TypesRow(Random.nextInt().abs, reqBody.name)
-        TypesDao.insert(row)
-        row
+        TypesDao.insert(TypesRow(0, reqBody.name))
       }
       val res = PetType.fromRow(newRow)
       Response.withBody(res)
@@ -41,7 +37,7 @@ class PettypesController(dbCtx: SqueryContext) {
       val reqBody = Request.current.bodyJsonValidated[PetType]
       val row = dbCtx.runTransaction {
         val row = TypesDao.findById(petTypeId)
-        val updatedRow = row.copy(NAME = reqBody.name)
+        val updatedRow = row.copy(name = reqBody.name)
         TypesDao.updateById(updatedRow)
         updatedRow
       }

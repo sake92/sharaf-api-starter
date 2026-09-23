@@ -9,11 +9,25 @@ Openapi and db schema are taken from https://github.com/spring-petclinic/spring-
 
 ## Development
 
-The project uses sbt 2 and requires JDK 17 or newer. The current build uses
-locally published `sbt-squery` and `sbt-openapi4s` `0.1.0-SNAPSHOT` plugins.
+The project uses PostgreSQL 17, sbt 2, and JDK 17 or newer. Generated OpenAPI
+and database sources are committed to the repository.
+
+The simplest way to start the database, apply migrations, and run the API is:
 
 ```shell
-# Create the local H2 database and populate it with sample data
+docker compose up --build
+```
+
+The API and Swagger UI are then available at <http://localhost:8080>. PostgreSQL
+data is kept in the `postgres-data` Docker volume. Use `docker compose down` to
+stop the services, or `docker compose down --volumes` when you intentionally
+want to reset the local database.
+
+For running directly from sbt, start PostgreSQL first. The build defaults match
+the Compose development database (`petclinic` / `petclinic` on port 5432):
+
+```shell
+# Create or update the PostgreSQL schema and populate its sample data
 sbt flywayMigrate
 
 # Generate database models and DAOs
@@ -29,3 +43,9 @@ sbt scalafmtAll
 sbt compile
 sbt run
 ```
+
+Outside `sbt run`, the application requires `JDBC_URL`, `DB_USER`,
+`DB_PASSWORD`, and `DB_POOL_SIZE`. `SERVER_HOST` is optional and defaults to
+`localhost`; containers set it to `0.0.0.0`. Startup fails immediately if the
+required database configuration is absent or invalid. `.env.example` contains
+safe local-development values.

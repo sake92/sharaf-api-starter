@@ -4,19 +4,19 @@ import java.util.UUID
 import ba.sake.squery.{*, given}
 import ba.sake.squery.read.{*, given}
 import ba.sake.squery.write.{*, given}
-import ba.sake.squery.h2.{*, given}
+import ba.sake.squery.postgres.{*, given}
 object VisitsRow {
-  inline val tableName = "PUBLIC.VISITS"
-  inline val id = "ID"
-  inline val petId = "PET_ID"
-  inline val visitDate = "VISIT_DATE"
-  inline val description = "DESCRIPTION"
-  inline val allCols = "ID, PET_ID, VISIT_DATE, DESCRIPTION"
+  inline val tableName = "public.visits"
+  inline val id = "id"
+  inline val petId = "pet_id"
+  inline val visitDate = "visit_date"
+  inline val description = "description"
+  inline val allCols = "id, pet_id, visit_date, description"
   transparent inline def allColsWithPrefix(inline prefix: String) = {
-    prefix + ".ID" + "," + (prefix + ".PET_ID") + "," + (prefix + ".VISIT_DATE") + "," + (prefix + ".DESCRIPTION")
+    prefix + ".id" + "," + (prefix + ".pet_id") + "," + (prefix + ".visit_date") + "," + (prefix + ".description")
   }
   type PK = Int
 }
-case class VisitsRow(ID: Int, PET_ID: Int, VISIT_DATE: LocalDate, DESCRIPTION: String) derives SqlReadRow {
-  def pk: VisitsRow.PK = ID
+case class VisitsRow(id: Int, pet_id: Int, visit_date: LocalDate, description: String) derives SqlReadRow {
+  def pk: VisitsRow.PK = id
 }

@@ -4,9 +4,9 @@ import java.util.UUID
 import ba.sake.squery.{*, given}
 import ba.sake.squery.read.{*, given}
 import ba.sake.squery.write.{*, given}
-import ba.sake.squery.h2.{*, given}
+import ba.sake.squery.postgres.{*, given}
 object FlywaySchemaHistoryRow {
-  inline val tableName = "PUBLIC.flyway_schema_history"
+  inline val tableName = "public.flyway_schema_history"
   inline val installedRank = "installed_rank"
   inline val version = "version"
   inline val description = "description"
