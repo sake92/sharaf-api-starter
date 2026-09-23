@@ -24,7 +24,7 @@ services:
       FLYWAY_LOCATIONS: filesystem:/flyway/sql
       FLYWAY_CONNECT_RETRIES: "10"
     volumes:
-      - ./api/src/main/resources/db/migration:/flyway/sql:ro
+      - ./modules/api/src/main/resources/db/migration:/flyway/sql:ro
     depends_on:
       postgres:
         condition: service_healthy

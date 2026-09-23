@@ -7,7 +7,7 @@ lazy val dbUser = settingKey[String]("Database user used by Flyway and code gene
 lazy val dbPassword = settingKey[String]("Database password used by Flyway and code generators")
 
 lazy val api = project
-  .in(file("api"))
+  .in(file("modules/api"))
   .enablePlugins(FlywayPlugin, OpenApi4sPlugin, ba.sake.sbt.squery.SqueryPlugin, PackPlugin)
   .settings(
     name := "sharaf-api-starter",
