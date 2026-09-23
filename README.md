@@ -49,3 +49,10 @@ Outside `sbt run`, the application requires `JDBC_URL`, `DB_USER`,
 `localhost`; containers set it to `0.0.0.0`. Startup fails immediately if the
 required database configuration is absent or invalid. `.env.example` contains
 safe local-development values.
+
+Configuration is loaded through Sharaf's Typesafe Config integration. The
+environment variables above are mapped in `application.conf`; deployments can
+also provide HOCON configuration under the `petclinic` key with
+`-Dconfig.file=/path/to/config.conf`, or override individual values with JVM
+system properties such as `-Dpetclinic.serverHost=0.0.0.0`. JVM system
+properties take precedence over file configuration.

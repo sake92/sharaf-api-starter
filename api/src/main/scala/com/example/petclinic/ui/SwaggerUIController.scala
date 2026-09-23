@@ -5,7 +5,6 @@ import ba.sake.sharaf.{*, given}
 
 class SwaggerUIController() {
 
-  val baseUrl = "http://localhost:8080"
   val swaggerWebjarUrl = "/swagger-ui/5.20.1"
 
   val indexFile =
@@ -29,7 +28,7 @@ class SwaggerUIController() {
           <script>
           window.onload = function() {
             window.ui = SwaggerUIBundle({
-              url: "${baseUrl}/openapi.yaml",
+              url: "/openapi.yaml",
               dom_id: '#swagger-ui',
               deepLinking: true,
               presets: [

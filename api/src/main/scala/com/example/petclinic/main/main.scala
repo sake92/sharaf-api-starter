@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 @main def apiMain: Unit = {
   System.err.println("petclinic-api: starting")
   val config =
-    try AppConfig.load(sys.env)
+    try AppConfig.load()
     catch {
       case error: ConfigException =>
         System.err.println(s"petclinic-api: configuration error: ${error.getMessage}")
