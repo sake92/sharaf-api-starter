@@ -42,27 +42,37 @@ final class RunningPetClinic private[main] (
 object PetClinicApplication {
   def start(config: AppConfig): RunningPetClinic = {
     val dataSource = createDataSource(config.database)
-    try {
-      val dbCtx = SqueryContext(dataSource)
-      val routes = Routes.merge(
-        Seq(
-          FailingController().routes,
-          OwnerController().routes,
-          PetController(dbCtx).routes,
-          PettypesController(dbCtx).routes,
-          SpecialtyController().routes,
-          UserController().routes,
-          VetController().routes,
-          VisitController().routes,
-          SwaggerUIController().routes
+    val server =
+      try {
+        val dbCtx = SqueryContext(dataSource)
+        val routes = Routes.merge(
+          Seq(
+            FailingController().routes,
+            OwnerController().routes,
+            PetController(dbCtx).routes,
+            PettypesController(dbCtx).routes,
+            SpecialtyController().routes,
+            UserController().routes,
+            VetController().routes,
+            VisitController().routes,
+            SwaggerUIController().routes
+          )
         )
-      )
-      val server = UndertowSharafServer(config.serverHost, config.serverPort, routes)
+        UndertowSharafServer(config.serverHost, config.serverPort, routes)
+      } catch {
+        case error: Throwable =>
+          dataSource.close()
+          throw error
+      }
+
+    try {
       server.start()
       RunningPetClinic(server, dataSource, s"http://${config.serverHost}:${config.serverPort}")
     } catch {
       case error: Throwable =>
-        dataSource.close()
+        try server.stop()
+        catch case stopError: Throwable => error.addSuppressed(stopError)
+        finally dataSource.close()
         throw error
     }
   }
