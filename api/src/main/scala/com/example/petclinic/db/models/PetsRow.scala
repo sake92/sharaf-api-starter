@@ -1,32 +1,23 @@
 package com.example.petclinic.db.models
-
 import java.time.*
 import java.util.UUID
 import ba.sake.squery.{*, given}
 import ba.sake.squery.read.{*, given}
 import ba.sake.squery.write.{*, given}
-import ba.sake.squery.h2.{*, given}
-
+import ba.sake.squery.postgres.{*, given}
 object PetsRow {
-  inline val tableName = "PUBLIC.PETS"
-  inline val id = "ID"
-  inline val name = "NAME"
-  inline val birthDate = "BIRTH_DATE"
-  inline val typeId = "TYPE_ID"
-  inline val ownerId = "OWNER_ID"
-  inline val allCols = "ID, NAME, BIRTH_DATE, TYPE_ID, OWNER_ID"
+  inline val tableName = "public.pets"
+  inline val id = "id"
+  inline val name = "name"
+  inline val birthDate = "birth_date"
+  inline val typeId = "type_id"
+  inline val ownerId = "owner_id"
+  inline val allCols = "id, name, birth_date, type_id, owner_id"
   transparent inline def allColsWithPrefix(inline prefix: String) = {
-    prefix + ".ID" + "," + (prefix + ".NAME") + "," + (prefix + ".BIRTH_DATE") + "," + (prefix + ".TYPE_ID") + "," + (prefix + ".OWNER_ID")
+    prefix + ".id" + "," + (prefix + ".name") + "," + (prefix + ".birth_date") + "," + (prefix + ".type_id") + "," + (prefix + ".owner_id")
   }
   type PK = Int
 }
-
-case class PetsRow(
-    ID: Int,
-    NAME: String,
-    BIRTH_DATE: LocalDate,
-    TYPE_ID: Int,
-    OWNER_ID: Int
-) derives SqlReadRow {
-  def pk: PetsRow.PK = ID
+case class PetsRow(id: Int, name: String, birth_date: LocalDate, type_id: Int, owner_id: Int) derives SqlReadRow {
+  def pk: PetsRow.PK = id
 }

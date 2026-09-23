@@ -21,11 +21,11 @@ object Pet {
 
   def fromRow(row: PetsRow, petType: TypesRow, visits: Seq[VisitsRow]): Pet =
     Pet(
-      name = row.NAME,
-      birthDate = row.BIRTH_DATE,
+      name = row.name,
+      birthDate = row.birth_date,
       `type` = PetType.fromRow(petType),
-      id = row.ID,
-      ownerId = Some(row.OWNER_ID),
+      id = row.id,
+      ownerId = Some(row.owner_id),
       visits = visits.map(Visit.fromRow)
     )
 }

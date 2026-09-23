@@ -14,7 +14,7 @@ object PetType {
 
   def fromRow(row: TypesRow): PetType =
     PetType(
-      name = row.NAME,
-      id = row.ID
+      name = row.name,
+      id = row.id
     )
 }
