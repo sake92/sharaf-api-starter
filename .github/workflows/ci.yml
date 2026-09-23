@@ -19,6 +19,10 @@ jobs:
           java-version: "17"
           cache: sbt
       - uses: sbt/setup-sbt@v1
+      - name: Check generated contracts
+        run: |
+          sbt --batch generateContracts
+          git diff --exit-code -- modules/api/src/main/scala modules/client/src/main/scala
       - name: Check formatting and run tests
         run: sbt --batch "scalafmtCheckAll; test"
       - name: Build container

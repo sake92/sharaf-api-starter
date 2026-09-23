@@ -11,6 +11,7 @@ RUN java -jar /usr/local/lib/sbt-launch.jar update
 
 # API and database sources are generated locally and committed. Image builds
 # compile those checked-in sources but do not regenerate them.
+COPY openapi openapi
 COPY modules/api modules/api
 RUN java -jar /usr/local/lib/sbt-launch.jar "api / pack"
 

@@ -18,8 +18,30 @@ import java.util.concurrent.atomic.AtomicBoolean
         sys.exit(2)
     }
 
-  val dataSource = createDataSource(config.database)
-  val server =
+  val app = PetClinicApplication.start(config)
+
+  Runtime.getRuntime.addShutdownHook(Thread(() => app.close(), "petclinic-api-shutdown"))
+  System.err.println(s"petclinic-api: listening on ${app.baseUri}")
+}
+
+final class RunningPetClinic private[main] (
+    private val server: UndertowSharafServer,
+    private val dataSource: HikariDataSource,
+    val baseUri: String
+) extends AutoCloseable {
+  private val stopped = AtomicBoolean(false)
+
+  override def close(): Unit =
+    if stopped.compareAndSet(false, true) then {
+      System.err.println("petclinic-api: shutting down")
+      try server.stop()
+      finally dataSource.close()
+    }
+}
+
+object PetClinicApplication {
+  def start(config: AppConfig): RunningPetClinic = {
+    val dataSource = createDataSource(config.database)
     try {
       val dbCtx = SqueryContext(dataSource)
       val routes = Routes.merge(
@@ -35,29 +57,14 @@ import java.util.concurrent.atomic.AtomicBoolean
           SwaggerUIController().routes
         )
       )
-      UndertowSharafServer(config.serverHost, 8080, routes)
+      val server = UndertowSharafServer(config.serverHost, config.serverPort, routes)
+      server.start()
+      RunningPetClinic(server, dataSource, s"http://${config.serverHost}:${config.serverPort}")
     } catch {
       case error: Throwable =>
         dataSource.close()
         throw error
     }
-
-  val stopped = AtomicBoolean(false)
-  def stop(): Unit =
-    if stopped.compareAndSet(false, true) then {
-      System.err.println("petclinic-api: shutting down")
-      try server.stop()
-      finally dataSource.close()
-    }
-
-  Runtime.getRuntime.addShutdownHook(Thread(() => stop(), "petclinic-api-shutdown"))
-  try {
-    server.start()
-    System.err.println(s"petclinic-api: listening on http://${config.serverHost}:8080")
-  } catch {
-    case error: Throwable =>
-      stop()
-      throw error
   }
 }
 

@@ -7,14 +7,14 @@ import com.typesafe.config.ConfigFactory
 import java.net.URI
 import scala.util.control.NonFatal
 
-private[main] final case class DatabaseConfig(
+final case class DatabaseConfig(
     jdbcUrl: String,
     user: String,
     password: String,
     poolSize: Int
 ) derives JsonRW
 
-private[main] object DatabaseConfig {
+object DatabaseConfig {
   given Validator[DatabaseConfig] = Validator
     .derived[DatabaseConfig]
     .notBlank(_.jdbcUrl)
@@ -33,10 +33,13 @@ private[main] object DatabaseConfig {
       })
 }
 
-private[main] final case class AppConfig(database: DatabaseConfig, serverHost: String) derives JsonRW
+final case class AppConfig(database: DatabaseConfig, serverHost: String, serverPort: Int) derives JsonRW
 
-private[main] object AppConfig {
-  given Validator[AppConfig] = Validator.derived[AppConfig].notBlank(_.serverHost)
+object AppConfig {
+  given Validator[AppConfig] = Validator
+    .derived[AppConfig]
+    .notBlank(_.serverHost)
+    .between(_.serverPort, 1, 65535)
 
   def load(): AppConfig =
     try ConfigFactory.load().getConfig("petclinic").parseConfig[AppConfig].validateOrThrow
