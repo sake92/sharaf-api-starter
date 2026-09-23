@@ -11,14 +11,15 @@ RUN java -jar /usr/local/lib/sbt-launch.jar update
 
 # API and database sources are generated locally and committed. Image builds
 # compile those checked-in sources but do not regenerate them.
-COPY api api
+COPY openapi openapi
+COPY modules/api modules/api
 RUN java -jar /usr/local/lib/sbt-launch.jar "api / pack"
 
 FROM eclipse-temurin:17-jre-alpine
 
 RUN addgroup -S petclinic && adduser -S -G petclinic petclinic
 WORKDIR /app
-COPY --from=build --chown=petclinic:petclinic /workspace/api/target/pack /app
+COPY --from=build --chown=petclinic:petclinic /workspace/modules/api/target/pack /app
 
 USER petclinic
 EXPOSE 8080
