@@ -59,11 +59,12 @@ Outside `sbt api/run`, the application requires `JDBC_URL`, `DB_USER`,
 defaults to `8080`. Startup fails immediately if required database configuration
 is absent or invalid. `.env.example` contains safe local-development values.
 
-Configuration is loaded through Sharaf's Typesafe Config integration. The
-environment variables above are mapped in `application.conf`; deployments can
-also provide HOCON configuration under the `petclinic` key with
-`-Dconfig.file=/path/to/config.conf`, or override individual values with JVM
-system properties such as `-Dpetclinic.serverHost=0.0.0.0`. JVM system
+Configuration is loaded through Sharaf's Typesafe Config integration. Database
+environment variables are mapped in `application.conf`; optional server defaults
+and environment overrides live in `reference.conf`, so they remain available
+when a deployment supplies HOCON under the `petclinic` key with
+`-Dconfig.file=/path/to/config.conf`. Individual values can also be overridden
+with JVM system properties such as `-Dpetclinic.serverHost=0.0.0.0`; JVM system
 properties take precedence over file configuration.
 
 ## Modules

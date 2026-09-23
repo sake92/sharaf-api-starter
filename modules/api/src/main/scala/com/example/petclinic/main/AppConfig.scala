@@ -5,6 +5,7 @@ import ba.sake.tupson.config.*
 import ba.sake.validson.*
 import com.typesafe.config.ConfigFactory
 import java.net.URI
+import org.postgresql.Driver
 import scala.util.control.NonFatal
 
 final case class DatabaseConfig(
@@ -27,7 +28,9 @@ object DatabaseConfig {
     value.startsWith("jdbc:postgresql://") &&
       (try {
         val uri = URI.create(value.stripPrefix("jdbc:"))
-        Option(uri.getHost).exists(!_.isBlank) && Option(uri.getPath).exists(_.length > 1)
+        Option(uri.getRawAuthority).exists(!_.isBlank) &&
+        Option(uri.getPath).exists(_.length > 1) &&
+        Driver().acceptsURL(value)
       } catch {
         case _: IllegalArgumentException => false
       })

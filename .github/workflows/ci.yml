@@ -22,6 +22,7 @@ jobs:
       - name: Check generated contracts
         run: |
           sbt --batch generateContracts
+          git add --intent-to-add -- modules/api/src/main/scala modules/client/src/main/scala
           git diff --exit-code -- modules/api/src/main/scala modules/client/src/main/scala
       - name: Check formatting and run tests
         run: sbt --batch "scalafmtCheckAll; test"
