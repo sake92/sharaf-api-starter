@@ -2,7 +2,6 @@ package com.example.petclinic.api.controllers
 
 import ba.sake.querson.QueryStringRW
 import ba.sake.sharaf.*, routing.*
-import ba.sake.sharaf.exceptions.NotFoundException
 import com.example.petclinic.api.models.*
 import com.example.petclinic.db.daos.{DeleteOwnerResult, OwnerDetails, OwnersRepo}
 import com.example.petclinic.db.models.OwnersRow
@@ -25,17 +24,20 @@ class OwnerController(repo: OwnersRepo) {
 
     case GET -> Path("owners", param[Int](ownerId)) =>
       if ownerId < 0 then invalidId
-      else {
-        val owner = repo.findById(ownerId).getOrElse(throw NotFoundException(s"Owner with ID $ownerId"))
-        Response.withBody(toOwner(owner))
-      }
+      else
+        repo.findById(ownerId) match {
+          case Some(owner) => Response.withBody(toOwner(owner))
+          case None        => ownerNotFound(ownerId)
+        }
 
     case PUT -> Path("owners", param[Int](ownerId)) =>
       if ownerId < 0 then invalidId
       else {
         val reqBody = Request.current.bodyJsonValidated[OwnerFields]
-        val owner = repo.update(toRow(ownerId, reqBody)).getOrElse(throw NotFoundException(s"Owner with ID $ownerId"))
-        Response.withBody(toOwner(owner))
+        repo.update(toRow(ownerId, reqBody)) match {
+          case Some(owner) => Response.withBody(toOwner(owner))
+          case None        => ownerNotFound(ownerId)
+        }
       }
 
     case DELETE -> Path("owners", param[Int](ownerId)) =>
@@ -43,7 +45,7 @@ class OwnerController(repo: OwnersRepo) {
       else {
         repo.delete(ownerId) match {
           case DeleteOwnerResult.Deleted(owner) => Response.withBody(toOwner(owner))
-          case DeleteOwnerResult.NotFound       => throw NotFoundException(s"Owner with ID $ownerId")
+          case DeleteOwnerResult.NotFound       => ownerNotFound(ownerId)
           case DeleteOwnerResult.HasPets =>
             ApiProblem.response(StatusCode.Conflict, s"Owner with ID $ownerId still has pets")
         }
@@ -51,6 +53,8 @@ class OwnerController(repo: OwnersRepo) {
   }
 
   private def invalidId = ApiProblem.response(StatusCode.BadRequest, "Owner ID must be non-negative")
+
+  private def ownerNotFound(ownerId: Int) = ApiProblem.response(StatusCode.NotFound, s"Owner with ID $ownerId")
 
   private def toRow(id: Int, fields: OwnerFields): OwnersRow =
     OwnersRow(id, fields.firstName, fields.lastName, fields.address, fields.city, fields.telephone)

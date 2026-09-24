@@ -156,6 +156,10 @@ final class PetClinicIntegrationSuite extends munit.FunSuite {
       .send(backend)
     assertProblem(missingUpdate.code, missingUpdate.body, 404)
 
+    val missingDelete =
+      basicRequest.delete(uri"${app.baseUri}/owners/${Int.MaxValue}").response(asStringAlways).send(backend)
+    assertProblem(missingDelete.code, missingDelete.body, 404)
+
     val conflict = basicRequest.delete(uri"${app.baseUri}/owners/6").response(asStringAlways).send(backend)
     assertProblem(conflict.code, conflict.body, 409)
     assertEquals(ownerNameInDatabase(6), Some("Jean"))

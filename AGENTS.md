@@ -23,7 +23,7 @@
 - Keep controller code focused on HTTP validation, status codes, and mapping to API models. Put owner joins and transactions in `modules/api/src/main/scala/com/example/petclinic/db/daos/OwnersRepo.scala`.
 - Owner deletion uses `DELETE ... RETURNING`; the `pets.owner_id` foreign key restricts deletion when pets exist. Translate only that constraint violation to HTTP 409.
 - Use Squery's `sql` fragments with generated DAO `findAllWhere` for simple predicates. Use `Option[Row]` for left-joined rows and `allColsWithPrefix` for nested `SqlReadRow` decoding.
-- Use `NotFoundException` for missing owners; `modules/api/src/main/scala/com/example/petclinic/main/main.scala` maps it to the API's structured error response.
+- Return `ApiProblem.response` for expected HTTP errors, including missing owners. Reserve `NotFoundException` for cases where a direct response is impractical; `modules/api/src/main/scala/com/example/petclinic/main/main.scala` maps it to the same structured error response.
 - Exercise API behavior through the generated client and real PostgreSQL in `modules/integration-tests`; Flyway applies the production migrations there.
 
 ## References
