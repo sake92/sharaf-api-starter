@@ -3,10 +3,17 @@ package com.example.petclinic.main
 import ba.sake.squery.SqueryContext
 import ba.sake.sharaf.*
 import ba.sake.sharaf.undertow.UndertowSharafServer
+import ba.sake.sharaf.exceptions.{ExceptionMapper, NotFoundException, RequestHandlingException}
+import ba.sake.tupson.TupsonException
+import ba.sake.querson.QuersonException
+import ba.sake.validson.ValidsonException
 import com.example.petclinic.api.controllers.*
+import com.example.petclinic.api.models.ValidationMessage
+import com.example.petclinic.db.daos.OwnersRepo
 import com.example.petclinic.ui.controllers.SwaggerUIController
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import java.util.concurrent.atomic.AtomicBoolean
+import sttp.model.StatusCode
 
 @main def apiMain: Unit = {
   System.err.println("petclinic-api: starting")
@@ -48,7 +55,7 @@ object PetClinicApplication {
         val routes = Routes.merge(
           Seq(
             FailingController().routes,
-            OwnerController().routes,
+            OwnerController(OwnersRepo(dbCtx)).routes,
             PetController(dbCtx).routes,
             PettypesController(dbCtx).routes,
             SpecialtyController().routes,
@@ -58,7 +65,7 @@ object PetClinicApplication {
             SwaggerUIController().routes
           )
         )
-        UndertowSharafServer(config.serverHost, config.serverPort, routes)
+        UndertowSharafServer(config.serverHost, config.serverPort, routes, exceptionMapper = apiExceptionMapper)
       } catch {
         case error: Throwable =>
           dataSource.close()
@@ -77,6 +84,23 @@ object PetClinicApplication {
     }
   }
 }
+
+private val customExceptionMapper: ExceptionMapper = {
+  case error: NotFoundException =>
+    ApiProblem.response(StatusCode.NotFound, error.getMessage)
+  case RequestHandlingException(error: ValidsonException) =>
+    ApiProblem.response(
+      StatusCode.BadRequest,
+      "Request validation failed",
+      error.errors.map(e => ValidationMessage(s"${e.path}: ${e.msg}"))
+    )
+  case RequestHandlingException(error: TupsonException) =>
+    ApiProblem.response(StatusCode.BadRequest, error.getMessage)
+  case RequestHandlingException(error: QuersonException) =>
+    ApiProblem.response(StatusCode.BadRequest, error.getMessage)
+}
+
+private val apiExceptionMapper: ExceptionMapper = customExceptionMapper.orElse(ExceptionMapper.default)
 
 private def createDataSource(config: DatabaseConfig): HikariDataSource = {
   val hikari = HikariConfig()
