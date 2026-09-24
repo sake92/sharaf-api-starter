@@ -9,6 +9,7 @@ import ba.sake.querson.QuersonException
 import ba.sake.validson.ValidsonException
 import com.example.petclinic.api.controllers.*
 import com.example.petclinic.api.models.ValidationMessage
+import com.example.petclinic.db.daos.OwnersRepo
 import com.example.petclinic.ui.controllers.SwaggerUIController
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import java.util.concurrent.atomic.AtomicBoolean
@@ -54,7 +55,7 @@ object PetClinicApplication {
         val routes = Routes.merge(
           Seq(
             FailingController().routes,
-            OwnerController(dbCtx).routes,
+            OwnerController(OwnersRepo(dbCtx)).routes,
             PetController(dbCtx).routes,
             PettypesController(dbCtx).routes,
             SpecialtyController().routes,

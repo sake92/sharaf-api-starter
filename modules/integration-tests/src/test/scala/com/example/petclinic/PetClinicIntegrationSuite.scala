@@ -159,6 +159,8 @@ final class PetClinicIntegrationSuite extends munit.FunSuite {
     val conflict = basicRequest.delete(uri"${app.baseUri}/owners/6").response(asStringAlways).send(backend)
     assertProblem(conflict.code, conflict.body, 409)
     assertEquals(ownerNameInDatabase(6), Some("Jean"))
+    val ownerAfterConflict = OwnerClient(app.baseUri).getOwner(6).send(backend)
+    assertEquals(ownerAfterConflict.body.fold(error => fail(error.getMessage), _.pets.size), 2)
 
     val invalid = basicRequest
       .post(uri"${app.baseUri}/owners")
