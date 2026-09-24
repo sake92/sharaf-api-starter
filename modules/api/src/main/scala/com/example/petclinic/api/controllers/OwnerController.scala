@@ -2,6 +2,7 @@ package com.example.petclinic.api.controllers
 
 import ba.sake.querson.QueryStringRW
 import ba.sake.sharaf.*, routing.*
+import ba.sake.sharaf.exceptions.NotFoundException
 import ba.sake.squery.{*, given}
 import com.example.petclinic.api.models.*
 import com.example.petclinic.db.daos.OwnersDao
@@ -17,14 +18,11 @@ class OwnerController(dbCtx: SqueryContext) {
       case class QP(lastName: Option[String]) derives QueryStringRW
       val qp = Request.current.queryParamsValidated[QP]
       val owners = dbCtx.run {
-        val rows = qp.lastName match {
+        val rows = (qp.lastName match {
           case Some(lastName) =>
-            sql"""SELECT id, first_name, last_name, address, city, telephone
-              FROM public.owners
-              WHERE lower(left(last_name, length($lastName))) = lower($lastName)
-              ORDER BY id""".readRows[OwnersRow]()
-          case None => OwnersDao.findAll().sortBy(_.id)
-        }
+            OwnersDao.findAllWhere(sql"starts_with(lower(last_name), lower($lastName))")
+          case None => OwnersDao.findAll()
+        }).sortBy(_.id)
         withPets(rows)
       }
       Response.withBody(owners)
@@ -41,12 +39,10 @@ class OwnerController(dbCtx: SqueryContext) {
       if ownerId < 0 then invalidId
       else {
         val owner = dbCtx.run {
-          OwnersDao.findByIdOpt(ownerId).map(row => withPets(Seq(row)).head)
+          val row = OwnersDao.findByIdOpt(ownerId).getOrElse(throw NotFoundException(s"Owner with ID $ownerId"))
+          withPets(Seq(row)).head
         }
-        owner match {
-          case Some(found) => Response.withBody(found)
-          case None        => ApiProblem.response(StatusCode.NotFound, s"Owner with ID $ownerId not found")
-        }
+        Response.withBody(owner)
       }
 
     case PUT -> Path("owners", param[Int](ownerId)) =>
@@ -54,38 +50,30 @@ class OwnerController(dbCtx: SqueryContext) {
       else {
         val reqBody = Request.current.bodyJsonValidated[OwnerFields]
         val owner = dbCtx.runTransaction {
-          lockedOwner(ownerId).map { _ =>
-            val row = toRow(ownerId, reqBody)
-            OwnersDao.updateById(row)
-            withPets(Seq(row)).head
-          }
+          lockedOwner(ownerId).getOrElse(throw NotFoundException(s"Owner with ID $ownerId"))
+          val row = toRow(ownerId, reqBody)
+          OwnersDao.updateById(row)
+          withPets(Seq(row)).head
         }
-        owner match {
-          case Some(found) => Response.withBody(found)
-          case None        => ApiProblem.response(StatusCode.NotFound, s"Owner with ID $ownerId not found")
-        }
+        Response.withBody(owner)
       }
 
     case DELETE -> Path("owners", param[Int](ownerId)) =>
       if ownerId < 0 then invalidId
       else {
-        val result = dbCtx.runTransaction {
-          lockedOwner(ownerId) match {
-            case None => Left(StatusCode.NotFound)
-            case Some(ownerRow) =>
-              val owner = withPets(Seq(ownerRow)).head
-              if owner.pets.nonEmpty then Left(StatusCode.Conflict)
-              else {
-                OwnersDao.deleteById(ownerId)
-                Right(owner)
-              }
+        val ownerOpt = dbCtx.runTransaction {
+          val row = lockedOwner(ownerId).getOrElse(throw NotFoundException(s"Owner with ID $ownerId"))
+          val owner = withPets(Seq(row)).head
+          if owner.pets.nonEmpty then None
+          else {
+            OwnersDao.deleteById(ownerId)
+            Some(owner)
           }
         }
-        result match {
-          case Right(owner) => Response.withBody(owner)
-          case Left(StatusCode.Conflict) =>
+        ownerOpt match {
+          case Some(owner) => Response.withBody(owner)
+          case None =>
             ApiProblem.response(StatusCode.Conflict, s"Owner with ID $ownerId still has pets")
-          case Left(_) => ApiProblem.response(StatusCode.NotFound, s"Owner with ID $ownerId not found")
         }
       }
   }

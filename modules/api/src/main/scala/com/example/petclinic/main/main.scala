@@ -3,7 +3,7 @@ package com.example.petclinic.main
 import ba.sake.squery.SqueryContext
 import ba.sake.sharaf.*
 import ba.sake.sharaf.undertow.UndertowSharafServer
-import ba.sake.sharaf.exceptions.{ExceptionMapper, RequestHandlingException}
+import ba.sake.sharaf.exceptions.{ExceptionMapper, NotFoundException, RequestHandlingException}
 import ba.sake.tupson.TupsonException
 import ba.sake.querson.QuersonException
 import ba.sake.validson.ValidsonException
@@ -84,7 +84,9 @@ object PetClinicApplication {
   }
 }
 
-private val requestExceptionMapper: ExceptionMapper = {
+private val customExceptionMapper: ExceptionMapper = {
+  case error: NotFoundException =>
+    ApiProblem.response(StatusCode.NotFound, error.getMessage)
   case RequestHandlingException(error: ValidsonException) =>
     ApiProblem.response(
       StatusCode.BadRequest,
@@ -97,7 +99,7 @@ private val requestExceptionMapper: ExceptionMapper = {
     ApiProblem.response(StatusCode.BadRequest, error.getMessage)
 }
 
-private val apiExceptionMapper: ExceptionMapper = requestExceptionMapper.orElse(ExceptionMapper.default)
+private val apiExceptionMapper: ExceptionMapper = customExceptionMapper.orElse(ExceptionMapper.default)
 
 private def createDataSource(config: DatabaseConfig): HikariDataSource = {
   val hikari = HikariConfig()
