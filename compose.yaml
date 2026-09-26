@@ -7,28 +7,14 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-petclinic}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 5s
-
-  migrate:
-    image: flyway/flyway:11.11.0
-    command: migrate
-    environment:
-      FLYWAY_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-petclinic}
-      FLYWAY_USER: ${DB_USER:-petclinic}
-      FLYWAY_PASSWORD: ${DB_PASSWORD:-petclinic}
-      FLYWAY_LOCATIONS: filesystem:/flyway/sql
-      FLYWAY_CONNECT_RETRIES: "10"
-    volumes:
-      - ./modules/api/src/main/resources/db/migration:/flyway/sql:ro
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: "no"
 
   api:
     build:
@@ -42,8 +28,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres-data:

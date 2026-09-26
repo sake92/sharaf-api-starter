@@ -13,6 +13,7 @@ import com.example.petclinic.db.daos.OwnersRepo
 import com.example.petclinic.ui.controllers.SwaggerUIController
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import java.util.concurrent.atomic.AtomicBoolean
+import org.flywaydb.core.Flyway
 import sttp.model.StatusCode
 
 @main def apiMain: Unit = {
@@ -48,6 +49,7 @@ final class RunningPetClinic private[main] (
 
 object PetClinicApplication {
   def start(config: AppConfig): RunningPetClinic = {
+    migrateDatabase(config.database)
     val dataSource = createDataSource(config.database)
     val server =
       try {
@@ -83,6 +85,15 @@ object PetClinicApplication {
         throw error
     }
   }
+}
+
+private def migrateDatabase(config: DatabaseConfig): Unit = {
+  System.err.println("petclinic-api: applying database migrations")
+  Flyway
+    .configure()
+    .dataSource(config.jdbcUrl, config.user, config.password)
+    .load()
+    .migrate()
 }
 
 private val customExceptionMapper: ExceptionMapper = {

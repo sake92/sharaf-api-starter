@@ -27,7 +27,9 @@ password.
 4. Review and commit the migration and generated source changes together.
 5. Verify the change with the relevant compile or integration-test command.
 
-The sbt Flyway task prepares a local database so that Squery can generate code.
+The deployed API applies the same migrations during startup, before it accepts
+requests. The sbt Flyway task prepares a local database so that Squery can
+generate code; it is not a second production migration path.
 
 While a migration is private and only applied to a disposable local database,
 you can reset that database and amend the migration. Once it has been shared or

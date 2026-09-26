@@ -9,6 +9,7 @@ lazy val generateContracts = taskKey[Unit]("Generate server and client code from
 
 lazy val scala3Version = "3.9.0"
 lazy val openApi4sGeneratorVersion = "0.9.0"
+lazy val flywayVersion = "11.11.0"
 lazy val canonicalOpenApiFile = file("openapi/petclinic.yaml")
 
 lazy val root = project
@@ -33,6 +34,8 @@ lazy val api = project
       "ba.sake" %% "sharaf-undertow" % "0.19.0",
       "ba.sake" %% "squery" % "0.12.0",
       "com.zaxxer" % "HikariCP" % "7.1.0",
+      "org.flywaydb" % "flyway-core" % flywayVersion,
+      "org.flywaydb" % "flyway-database-postgresql" % flywayVersion,
       "org.postgresql" % "postgresql" % "42.7.13",
       "org.webjars" % "swagger-ui" % "5.20.1"
     ),
@@ -92,9 +95,7 @@ lazy val integrationTests = project
     publish / skip := true,
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % "1.3.4" % Test,
-      "org.testcontainers" % "testcontainers-postgresql" % "2.0.3" % Test,
-      "org.flywaydb" % "flyway-core" % "11.11.0" % Test,
-      "org.flywaydb" % "flyway-database-postgresql" % "11.11.0" % Test
+      "org.testcontainers" % "testcontainers-postgresql" % "2.0.3" % Test
     ),
     Test / fork := true,
     Test / parallelExecution := false

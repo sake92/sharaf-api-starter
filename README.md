@@ -21,21 +21,26 @@ and database sources are committed to the repository.
 For the database schema-change and Squery-generation workflow, see
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The simplest way to start the database, apply migrations, and run the API is:
+The simplest way to start the database and run the API is:
 
 ```shell
 docker compose up --build
 ```
 
-The API and Swagger UI are then available at <http://localhost:8080>. PostgreSQL
-data is kept in the `postgres-data` Docker volume. Use `docker compose down` to
-stop the services, or `docker compose down --volumes` when you intentionally
-want to reset the local database.
+The API applies Flyway migrations during startup, before it accepts requests.
+The API and Swagger UI are then available at <http://localhost:8080> and
+PostgreSQL is available on `localhost:5432`. PostgreSQL data is kept in the
+`postgres-data` Docker volume. Use `docker compose down` to stop the services,
+or `docker compose down --volumes` when you intentionally want to reset the
+local database.
 
-For running directly from sbt, start PostgreSQL first. The build defaults match
-the Compose development database (`petclinic` / `petclinic` on port 5432):
+For running directly from sbt, start only PostgreSQL first. The build defaults
+match the Compose development database (`petclinic` / `petclinic` on port 5432):
 
 ```shell
+# Start the database for local development and generated database sources
+docker compose up -d postgres
+
 # Create or update the PostgreSQL schema and populate its sample data
 sbt api/flywayMigrate
 
@@ -75,4 +80,4 @@ properties take precedence over file configuration.
 - `modules/api` owns the application, database access, migrations, and server implementation.
 - `modules/client` is generated as a real external consumer and does not depend on `api`.
 - `modules/integration-tests` depends on both, starts PostgreSQL with Testcontainers,
-  applies the real Flyway migrations, and calls the running API over HTTP.
+  and calls the migration-owning API over HTTP.

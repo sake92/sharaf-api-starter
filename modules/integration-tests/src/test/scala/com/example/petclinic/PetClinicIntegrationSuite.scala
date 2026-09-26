@@ -7,7 +7,6 @@ import com.example.petclinic.main.{AppConfig, DatabaseConfig, PetClinicApplicati
 import java.net.{InetAddress, ServerSocket}
 import java.sql.DriverManager
 import java.util.UUID
-import org.flywaydb.core.Flyway
 import org.testcontainers.postgresql.PostgreSQLContainer
 import scala.util.Using
 import scala.util.Try
@@ -23,13 +22,6 @@ final class PetClinicIntegrationSuite extends munit.FunSuite {
     super.beforeAll()
     try {
       postgres.start()
-      Flyway
-        .configure()
-        .dataSource(postgres.getJdbcUrl, postgres.getUsername, postgres.getPassword)
-        .locations("classpath:db/migration")
-        .load()
-        .migrate()
-
       val config = AppConfig(
         database = DatabaseConfig(
           jdbcUrl = postgres.getJdbcUrl,
