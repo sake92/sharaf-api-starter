@@ -7,7 +7,7 @@ lazy val dbUser = settingKey[String]("Database user used by Flyway and code gene
 lazy val dbPassword = settingKey[String]("Database password used by Flyway and code generators")
 lazy val generateContracts = taskKey[Unit]("Generate server and client code from the canonical OpenAPI document")
 
-lazy val scala3Version = "3.7.4"
+lazy val scala3Version = "3.9.0"
 lazy val openApi4sGeneratorVersion = "0.9.0"
 lazy val canonicalOpenApiFile = file("openapi/petclinic.yaml")
 
@@ -30,7 +30,7 @@ lazy val api = project
     name := "sharaf-api-starter",
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
-      "ba.sake" %% "sharaf-undertow" % "0.18.0",
+      "ba.sake" %% "sharaf-undertow" % "0.19.0",
       "ba.sake" %% "squery" % "0.12.0",
       "com.zaxxer" % "HikariCP" % "7.1.0",
       "org.postgresql" % "postgresql" % "42.7.13",
@@ -71,8 +71,11 @@ lazy val client = project
   .settings(
     name := "petclinic-client",
     scalaVersion := scala3Version,
-    libraryDependencies += "com.softwaremill.sttp.client4" %% "circe" % "4.0.26",
-    openApi4sModels := "circe",
+    libraryDependencies ++= Seq(
+      "ba.sake" %% "tupson-sttp" % "0.30.0",
+      "ba.sake" %% "validson" % "0.19.0"
+    ),
+    openApi4sModels := "tupson",
     openApi4sFramework := None,
     openApi4sClient := Some("sttp"),
     openApi4sPackage := "com.example.petclinic.client",
