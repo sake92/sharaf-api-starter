@@ -1,6 +1,7 @@
 package com.example.petclinic.client.clients
 import sttp.client4.*
-import sttp.client4.circe.*
+import ba.sake.tupson.{given, *}
+import ba.sake.sttp.tupson.*
 import com.example.petclinic.client.models.*
 object SpecialtyClient { val server1: String = "/" }
 class SpecialtyClient(baseUrl: String) {

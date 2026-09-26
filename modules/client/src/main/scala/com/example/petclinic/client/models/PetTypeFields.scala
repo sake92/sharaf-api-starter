@@ -1,10 +1,10 @@
 package com.example.petclinic.client.models
 import java.time.*
 import java.util.UUID
-import io.circe.{Codec, Json}
-import io.circe.derivation.{Configuration, ConfiguredCodec, ConfiguredEnumCodec}
-case class PetTypeFields(name: String)
+import org.typelevel.jawn.ast.JValue
+import ba.sake.tupson.*
+import ba.sake.validson.Validator
+case class PetTypeFields(name: String) derives JsonRW
 object PetTypeFields {
-  given Configuration = Configuration.default
-  given Codec[PetTypeFields] = ConfiguredCodec.derived
+  given Validator[PetTypeFields] = Validator.derived[PetTypeFields].minLength(_.name, 1).maxLength(_.name, 80)
 }

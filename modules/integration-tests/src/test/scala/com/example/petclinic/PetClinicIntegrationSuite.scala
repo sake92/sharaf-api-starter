@@ -2,7 +2,7 @@ package com.example.petclinic
 
 import com.example.petclinic.client.clients.{OwnerClient, PettypesClient}
 import com.example.petclinic.client.models.{OwnerFields, PetTypeFields, ProblemDetail}
-import io.circe.parser.decode
+import ba.sake.tupson.*
 import com.example.petclinic.main.{AppConfig, DatabaseConfig, PetClinicApplication, RunningPetClinic}
 import java.net.{InetAddress, ServerSocket}
 import java.sql.DriverManager
@@ -10,6 +10,7 @@ import java.util.UUID
 import org.flywaydb.core.Flyway
 import org.testcontainers.postgresql.PostgreSQLContainer
 import scala.util.Using
+import scala.util.Try
 import sttp.client4.*
 import sttp.model.StatusCode
 
@@ -173,14 +174,14 @@ final class PetClinicIntegrationSuite extends munit.FunSuite {
       .response(asStringAlways)
       .send(backend)
     assertEquals(invalid.code, StatusCode.BadRequest)
-    val problem = decode[ProblemDetail](invalid.body).fold(error => fail(error.getMessage), identity)
+    val problem = Try(invalid.body.parseJson[ProblemDetail]).fold(error => fail(error.getMessage), identity)
     assertEquals(problem.status, 400)
     assert(problem.schemaValidationErrors.exists(_.message.contains("telephone")))
   }
 
   private def assertProblem(actualStatus: StatusCode, body: String, expectedStatus: Int): Unit = {
     assertEquals(actualStatus.code, expectedStatus)
-    val problem = decode[ProblemDetail](body).fold(error => fail(error.getMessage), identity)
+    val problem = Try(body.parseJson[ProblemDetail]).fold(error => fail(error.getMessage), identity)
     assertEquals(problem.status, expectedStatus)
     assertEquals(problem.`type`, "about:blank")
   }

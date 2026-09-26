@@ -1,8 +1,9 @@
 package com.example.petclinic.client.models
 import java.time.*
 import java.util.UUID
-import io.circe.{Codec, Json}
-import io.circe.derivation.{Configuration, ConfiguredCodec, ConfiguredEnumCodec}
+import org.typelevel.jawn.ast.JValue
+import ba.sake.tupson.*
+import ba.sake.validson.Validator
 case class ProblemDetail(
     `type`: String,
     title: String,
@@ -10,8 +11,7 @@ case class ProblemDetail(
     detail: String,
     timestamp: Instant,
     schemaValidationErrors: Seq[ValidationMessage]
-)
+) derives JsonRW
 object ProblemDetail {
-  given Configuration = Configuration.default
-  given Codec[ProblemDetail] = ConfiguredCodec.derived
+  given Validator[ProblemDetail] = Validator.derived[ProblemDetail].min(_.status, 400).max(_.status, 600)
 }
