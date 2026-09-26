@@ -18,6 +18,9 @@ as `/public/openapi.yaml` for Swagger UI.
 The project uses PostgreSQL 17, sbt 2, and JDK 17 or newer. Generated OpenAPI
 and database sources are committed to the repository.
 
+For the database schema-change and Squery-generation workflow, see
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
 The simplest way to start the database, apply migrations, and run the API is:
 
 ```shell
