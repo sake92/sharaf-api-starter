@@ -13,6 +13,30 @@ It generates both the Sharaf server contracts in `modules/api` and the external
 STTP client in `modules/client`. The API build also packages the same document
 as `/public/openapi.yaml` for Swagger UI.
 
+## Live deployment
+
+The API and Swagger UI are deployed at <https://sharaf-api-starter.onrender.com/>.
+This deployment uses the free tiers of [Render](https://render.com/) for the API
+and [Aiven](https://aiven.io/) for PostgreSQL.
+
+The Render service uses the repository's `Dockerfile` and these environment variables
+(replace the placeholders with your Aiven connection details):
+
+```dotenv
+DB_NAME=petclinic
+DB_PASSWORD=<database-password>
+DB_POOL_SIZE=10
+DB_USER=<database-user>
+JDBC_URL=jdbc:postgresql://<database-host>:<database-port>/petclinic
+SERVER_HOST=0.0.0.0
+SERVER_PORT=10000
+```
+
+Use the port from Aiven's connection details (it may differ from `5432`).
+`JDBC_URL` selects the database; `DB_NAME` is used by local Compose only.
+Render requires `SERVER_HOST=0.0.0.0`; set `SERVER_PORT` to match Render's
+`PORT` value, which defaults to `10000`.
+
 ## Development
 
 The project uses PostgreSQL 17, sbt 2, and JDK 17 or newer. Generated OpenAPI
