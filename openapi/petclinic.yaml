@@ -10,6 +10,8 @@ servers:
   - url: /
 
 tags:
+  - name: health
+    description: Application liveness and database readiness.
   - name: failing
     description: Endpoint which always returns an error.
   - name: owner
@@ -27,6 +29,30 @@ tags:
   - name: specialty
     description: Endpoints related to vet specialties.
 paths:
+  /health/live:
+    get:
+      tags:
+        - health
+      operationId: liveness
+      summary: Checks whether the HTTP server is running
+      responses:
+        '200':
+          description: The HTTP server is running.
+  /health/ready:
+    get:
+      tags:
+        - health
+      operationId: readiness
+      summary: Checks whether the database is available
+      responses:
+        '200':
+          description: The application can reach PostgreSQL.
+        '503':
+          description: PostgreSQL is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
   /oops:
     get:
       tags:

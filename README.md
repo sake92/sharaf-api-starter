@@ -34,8 +34,13 @@ SERVER_PORT=10000
 
 Use the port from Aiven's connection details (it may differ from `5432`).
 `JDBC_URL` selects the database; `DB_NAME` is used by local Compose only.
-Render requires `SERVER_HOST=0.0.0.0`; set `SERVER_PORT` to match Render's
-`PORT` value, which defaults to `10000`.
+Render requires `SERVER_HOST=0.0.0.0`. `SERVER_PORT` can be omitted: the API
+falls back to Render's `PORT` value, which defaults to `10000`.
+
+Set the Render service's Health Check Path to `/health/ready`. It returns `200`
+when a pooled PostgreSQL connection passes a one-second validation, or `503`
+when the database is unavailable. Pool acquisition times out after two seconds.
+`/health/live` returns `200` independently of database availability.
 
 ## Development
 
@@ -88,8 +93,8 @@ sbt integrationTests/test
 Outside `sbt api/run`, the application requires `JDBC_URL`, `DB_USER`,
 `DB_PASSWORD`, and `DB_POOL_SIZE`. `SERVER_HOST` is optional and defaults to
 `localhost`; containers set it to `0.0.0.0`. `SERVER_PORT` is optional and
-defaults to `8080`. Startup fails immediately if required database configuration
-is absent or invalid. `.env.example` contains safe local-development values.
+falls back to `PORT`, then `8080`. Startup fails immediately if required database
+configuration is absent or invalid. `.env.example` contains safe local-development values.
 
 Configuration is loaded through Sharaf's Typesafe Config integration. Database
 environment variables are mapped in `application.conf`; optional server defaults

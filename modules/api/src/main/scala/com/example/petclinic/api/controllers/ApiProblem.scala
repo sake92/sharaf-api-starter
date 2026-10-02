@@ -8,10 +8,11 @@ import sttp.model.StatusCode
 object ApiProblem {
   def response(status: StatusCode, detail: String, errors: Seq[ValidationMessage] = Seq.empty) = {
     val title = status match {
-      case StatusCode.BadRequest => "Bad Request"
-      case StatusCode.NotFound   => "Not Found"
-      case StatusCode.Conflict   => "Conflict"
-      case _                     => "Server Error"
+      case StatusCode.BadRequest         => "Bad Request"
+      case StatusCode.NotFound           => "Not Found"
+      case StatusCode.Conflict           => "Conflict"
+      case StatusCode.ServiceUnavailable => "Service Unavailable"
+      case _                             => "Server Error"
     }
     Response
       .withStatus(status)

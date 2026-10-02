@@ -1,6 +1,6 @@
 package com.example.petclinic
 
-import com.example.petclinic.client.clients.{OwnerClient, PettypesClient}
+import com.example.petclinic.client.clients.{HealthClient, OwnerClient, PettypesClient}
 import com.example.petclinic.client.models.{OwnerFields, PetTypeFields, ProblemDetail}
 import ba.sake.tupson.*
 import com.example.petclinic.main.{AppConfig, DatabaseConfig, PetClinicApplication, RunningPetClinic}
@@ -65,6 +65,12 @@ final class PetClinicIntegrationSuite extends munit.FunSuite {
     assert(created.id > 0)
 
     assertEquals(petTypeNameInDatabase(created.id), Some(uniqueName))
+  }
+
+  test("health checks report a running server and an available database") {
+    val client = HealthClient(app.baseUri)
+    assertEquals(client.liveness().send(backend).code, StatusCode.Ok)
+    assertEquals(client.readiness().send(backend).code, StatusCode.Ok)
   }
 
   test("the packaged canonical OpenAPI document is served by the API") {
@@ -169,6 +175,19 @@ final class PetClinicIntegrationSuite extends munit.FunSuite {
     val problem = Try(invalid.body.parseJson[ProblemDetail]).fold(error => fail(error.getMessage), identity)
     assertEquals(problem.status, 400)
     assert(problem.schemaValidationErrors.exists(_.message.contains("telephone")))
+  }
+
+  test("database failure makes readiness fail while liveness remains healthy") {
+    postgres.stop()
+    val client = HealthClient(app.baseUri)
+    assertEquals(client.liveness().send(backend).code, StatusCode.Ok)
+    val started = System.nanoTime()
+    val response = basicRequest.get(uri"${app.baseUri}/health/ready").response(asStringAlways).send(backend)
+    assertProblem(response.code, response.body, 503)
+    assert((System.nanoTime() - started) < java.util.concurrent.TimeUnit.SECONDS.toNanos(5))
+    val problem = response.body.parseJson[ProblemDetail]
+    assertEquals(problem.title, "Service Unavailable")
+    assertEquals(problem.detail, "Database is unavailable")
   }
 
   private def assertProblem(actualStatus: StatusCode, body: String, expectedStatus: Int): Unit = {

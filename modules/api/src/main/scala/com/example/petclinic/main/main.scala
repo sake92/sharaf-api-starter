@@ -56,6 +56,7 @@ object PetClinicApplication {
         val dbCtx = SqueryContext(dataSource)
         val routes = Routes.merge(
           Seq(
+            HealthController(dataSource).routes,
             FailingController().routes,
             OwnerController(OwnersRepo(dbCtx)).routes,
             PetController(dbCtx).routes,
@@ -120,8 +121,8 @@ private def createDataSource(config: DatabaseConfig): HikariDataSource = {
   hikari.setPassword(config.password)
   hikari.setMaximumPoolSize(config.poolSize)
   hikari.setMinimumIdle(math.min(2, config.poolSize))
-  hikari.setConnectionTimeout(5000)
-  hikari.setValidationTimeout(3000)
+  hikari.setConnectionTimeout(2000)
+  hikari.setValidationTimeout(1000)
   hikari.setInitializationFailTimeout(1)
   hikari.setPoolName("petclinic-db")
   hikari.addDataSourceProperty("tcpKeepAlive", "true")
