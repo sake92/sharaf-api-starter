@@ -42,6 +42,10 @@ jobs:
       - name: Compare openapi/petclinic.yaml with base branch
         id: diff
         run: |
+          if git diff --quiet "origin/${{ github.base_ref }}...HEAD" -- openapi/petclinic.yaml; then
+            echo "touched=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "touched=true" >> "$GITHUB_OUTPUT"
           git show "origin/${{ github.base_ref }}:openapi/petclinic.yaml" > "$RUNNER_TEMP/base.yaml" || {
             echo "breaking=unknown" >> "$GITHUB_OUTPUT"; exit 0; }
           set +e
@@ -53,6 +57,7 @@ jobs:
           elif [ $code -eq 1 ]; then echo "breaking=true" >> "$GITHUB_OUTPUT"
           else echo "breaking=unknown" >> "$GITHUB_OUTPUT"; fi
       - name: Comment on PR
+        if: steps.diff.outputs.touched == 'true'
         continue-on-error: true
         uses: actions/github-script@v7
         env:
