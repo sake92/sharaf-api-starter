@@ -31,7 +31,7 @@ lazy val api = project
     name := "sharaf-api-starter",
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
-      "ba.sake" %% "sharaf-undertow" % "0.19.0",
+      "ba.sake" %% "sharaf-undertow" % "0.21.0",
       "ba.sake" %% "squery" % "0.12.0",
       "com.zaxxer" % "HikariCP" % "7.1.0",
       "org.flywaydb" % "flyway-core" % flywayVersion,
