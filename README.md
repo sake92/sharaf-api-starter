@@ -16,7 +16,7 @@ as `/public/openapi.yaml` for Swagger UI.
 
 ## Development
 
-The project uses PostgreSQL 17, Deder, and JDK 17 or newer. Generated OpenAPI
+The project uses PostgreSQL 17, Deder, and JDK 21 or newer. Generated OpenAPI
 and database sources are committed to the repository. The retained sbt 2 build
 provides the source-generation tasks described below.
 

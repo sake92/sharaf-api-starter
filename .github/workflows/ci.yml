@@ -16,11 +16,12 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
           cache: sbt
       - uses: sbt/setup-sbt@v1
+      - uses: Homebrew/actions/setup-homebrew@main
       - name: Install Deder
-        run: curl -fL https://github.com/sake92/deder/releases/download/v0.23.0/deder-client.jar -o "$RUNNER_TEMP/deder-client.jar"
+        run: brew install sake92/tap/deder
       - name: Check generated contracts
         run: |
           sbt --batch generateContracts
@@ -29,7 +30,7 @@ jobs:
       - name: Check formatting
         run: sbt --batch scalafmtCheckAll
       - name: Run integration tests with Deder
-        run: java -jar "$RUNNER_TEMP/deder-client.jar" exec -t test -m integration-tests
+        run: deder exec -t test -m integration-tests
       - name: Build container
         run: docker build --tag sharaf-api-starter:ci .
 

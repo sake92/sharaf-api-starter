@@ -2,7 +2,7 @@
 
 ## Setup and commands
 
-- Use Deder, JDK 17 or newer, sbt 2 for generation, and PostgreSQL 17. Native builds require GraalVM 25. See `README.md` for setup.
+- Use Deder, JDK 21 or newer, sbt 2 for generation, and PostgreSQL 17. Native builds require GraalVM 25. See `README.md` for setup.
 - Docker must be available for the Testcontainers integration suite.
 
 | Task | Command |
