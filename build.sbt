@@ -1,5 +1,6 @@
 import ba.sake.openapi4s.OpenApi4sPlugin
 import ba.sake.openapi4s.OpenApi4sPlugin.autoImport.*
+import ba.sake.sbt.squery.SqueryPlugin
 import ba.sake.sbt.squery.SqueryPlugin.autoImport.*
 
 lazy val jdbcUrl = settingKey[String]("JDBC URL used by the application and code generators")
@@ -26,12 +27,13 @@ lazy val root = project
 
 lazy val api = project
   .in(file("modules/api"))
-  .enablePlugins(FlywayPlugin, OpenApi4sPlugin, ba.sake.sbt.squery.SqueryPlugin, PackPlugin)
+  .enablePlugins(FlywayPlugin, OpenApi4sPlugin, SqueryPlugin, PackPlugin)
   .settings(
     name := "sharaf-api-starter",
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
-      "ba.sake" %% "sharaf-undertow" % "0.21.0",
+      "ba.sake" %% "sharaf-potateh" % "0.24.0",
+      "ba.sake" %% "tupson-config" % "0.32.1",
       "ba.sake" %% "squery" % "0.12.0",
       "com.zaxxer" % "HikariCP" % "7.1.0",
       "org.flywaydb" % "flyway-core" % flywayVersion,
@@ -60,11 +62,6 @@ lazy val api = project
     openApi4sPackage := "com.example.petclinic.api",
     openApi4sFile := canonicalOpenApiFile,
     openApi4sVersion := openApi4sGeneratorVersion,
-    Compile / resourceGenerators += Def.task {
-      val target = (Compile / resourceManaged).value / "public" / "openapi.yaml"
-      IO.copyFile(canonicalOpenApiFile, target)
-      Seq(target)
-    }.taskValue,
     packMain := Map("petclinic-api" -> "com.example.petclinic.main.apiMain")
   )
 

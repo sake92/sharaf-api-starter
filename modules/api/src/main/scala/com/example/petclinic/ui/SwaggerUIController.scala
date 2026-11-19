@@ -1,6 +1,5 @@
 package com.example.petclinic.ui.controllers
 
-import io.undertow.util.Headers
 import ba.sake.sharaf.{*, given}
 
 class SwaggerUIController() {

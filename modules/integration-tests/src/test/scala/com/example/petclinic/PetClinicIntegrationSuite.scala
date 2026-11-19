@@ -8,6 +8,7 @@ import java.net.{InetAddress, ServerSocket}
 import java.sql.DriverManager
 import java.util.UUID
 import org.testcontainers.postgresql.PostgreSQLContainer
+import org.flywaydb.core.Flyway
 import scala.util.Using
 import scala.util.Try
 import sttp.client4.*
@@ -67,6 +68,20 @@ final class PetClinicIntegrationSuite extends munit.FunSuite {
     assertEquals(petTypeNameInDatabase(created.id), Some(uniqueName))
   }
 
+  test("migration history remains compatible with Flyway and a second startup") {
+    Flyway.configure().dataSource(postgres.getJdbcUrl, postgres.getUsername, postgres.getPassword).load().validate()
+    val config = AppConfig(
+      DatabaseConfig(postgres.getJdbcUrl, postgres.getUsername, postgres.getPassword, 2),
+      "127.0.0.1",
+      availablePort()
+    )
+    val secondApp = PetClinicApplication.start(config)
+    try {
+      val response = PettypesClient(secondApp.baseUri).listPetTypes().send(backend)
+      assertEquals(response.code, StatusCode.Ok)
+    } finally secondApp.close()
+  }
+
   test("the packaged canonical OpenAPI document is served by the API") {
     val response = basicRequest
       .get(uri"${app.baseUri}/openapi.yaml")
@@ -76,6 +91,16 @@ final class PetClinicIntegrationSuite extends munit.FunSuite {
     assertEquals(response.code, StatusCode.Ok)
     assert(response.body.startsWith("openapi: 3.0.1"))
     assert(response.body.contains("operationId: listPetTypes"))
+  }
+
+  test("Swagger UI assets are served from the WebJar") {
+    val response = basicRequest
+      .get(uri"${app.baseUri}/swagger-ui/5.20.1/swagger-ui.css")
+      .response(asStringAlways)
+      .send(backend)
+
+    assertEquals(response.code, StatusCode.Ok)
+    assert(response.body.contains(".swagger-ui"))
   }
 
   test("malformed JSON is rejected at the HTTP boundary") {
