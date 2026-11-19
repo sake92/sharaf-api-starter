@@ -19,13 +19,17 @@ jobs:
           java-version: "17"
           cache: sbt
       - uses: sbt/setup-sbt@v1
+      - name: Install Deder
+        run: curl -fL https://github.com/sake92/deder/releases/download/v0.23.0/deder-client.jar -o "$RUNNER_TEMP/deder-client.jar"
       - name: Check generated contracts
         run: |
           sbt --batch generateContracts
           git add --intent-to-add -- modules/api/src/main/scala modules/client/src/main/scala
           git diff --exit-code -- modules/api/src/main/scala modules/client/src/main/scala
-      - name: Check formatting and run tests
-        run: sbt --batch "scalafmtCheckAll; test"
+      - name: Check formatting
+        run: sbt --batch scalafmtCheckAll
+      - name: Run integration tests with Deder
+        run: java -jar "$RUNNER_TEMP/deder-client.jar" exec -t test -m integration-tests
       - name: Build container
         run: docker build --tag sharaf-api-starter:ci .
 

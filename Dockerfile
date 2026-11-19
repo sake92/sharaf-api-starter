@@ -1,26 +1,23 @@
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM ghcr.io/graalvm/native-image-community:25 AS build
 
-ARG SBT_VERSION=2.0.6
-RUN wget -q "https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch/${SBT_VERSION}/sbt-launch-${SBT_VERSION}.jar" \
-    -O /usr/local/lib/sbt-launch.jar
+ARG DEDER_VERSION=v0.23.0
+ADD https://github.com/sake92/deder/releases/download/${DEDER_VERSION}/deder-client.jar /opt/deder-client.jar
 
 WORKDIR /workspace
-COPY project project
-COPY build.sbt .
-RUN java -jar /usr/local/lib/sbt-launch.jar update
+COPY deder.pkl .
 
 # API and database sources are generated locally and committed. Image builds
 # compile those checked-in sources but do not regenerate them.
 COPY openapi openapi
 COPY modules/api modules/api
-RUN java -jar /usr/local/lib/sbt-launch.jar "api / pack"
+ENV GRAALVM_HOME=${JAVA_HOME}
+RUN java -jar /opt/deder-client.jar exec -t graalvmNativeImage -m api
 
-FROM eclipse-temurin:17-jre-alpine
+FROM debian:bookworm-slim
 
-RUN addgroup -S petclinic && adduser -S -G petclinic petclinic
 WORKDIR /app
-COPY --from=build --chown=petclinic:petclinic /workspace/modules/api/target/pack /app
+COPY --from=build /workspace/.deder/out/api/graalvmNativeImage/native-executable /app/petclinic-api
 
-USER petclinic
+USER 10001:10001
 EXPOSE 8080
-ENTRYPOINT ["java", "-cp", "/app/lib/*", "com.example.petclinic.main.apiMain"]
+ENTRYPOINT ["/app/petclinic-api"]

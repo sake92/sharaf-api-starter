@@ -2,7 +2,7 @@ package com.example.petclinic.main
 
 import ba.sake.squery.SqueryContext
 import ba.sake.sharaf.*
-import ba.sake.sharaf.undertow.UndertowSharafServer
+import ba.sake.sharaf.potateh.PotatehSharafServer
 import ba.sake.sharaf.exceptions.{ExceptionMapper, NotFoundException, RequestHandlingException}
 import ba.sake.tupson.TupsonException
 import ba.sake.querson.QuersonException
@@ -33,7 +33,7 @@ import sttp.model.StatusCode
 }
 
 final class RunningPetClinic private[main] (
-    private val server: UndertowSharafServer,
+    private val server: PotatehSharafServer,
     private val dataSource: HikariDataSource,
     val baseUri: String
 ) extends AutoCloseable {
@@ -67,7 +67,17 @@ object PetClinicApplication {
             SwaggerUIController().routes
           )
         )
-        UndertowSharafServer(config.serverHost, config.serverPort, routes, exceptionMapper = apiExceptionMapper)
+        val resources = SharafHandler.classpathResources(
+          "public",
+          SharafHandler.classpathResources("META-INF/resources/webjars")
+        )
+        PotatehSharafServer(
+          routes,
+          config.serverHost,
+          config.serverPort,
+          exceptionMapper = apiExceptionMapper,
+          notFoundHandler = resources
+        )
       } catch {
         case error: Throwable =>
           dataSource.close()
@@ -92,6 +102,7 @@ private def migrateDatabase(config: DatabaseConfig): Unit = {
   Flyway
     .configure()
     .dataSource(config.jdbcUrl, config.user, config.password)
+    .resourceProvider(MigrationResources)
     .load()
     .migrate()
 }

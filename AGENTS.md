@@ -2,14 +2,15 @@
 
 ## Setup and commands
 
-- Use JDK 17 or newer, sbt 2, and PostgreSQL 17. See `README.md` for local configuration and Compose setup.
+- Use Deder, JDK 17 or newer, sbt 2 for generation, and PostgreSQL 17. Native builds require GraalVM 25. See `README.md` for setup.
 - Docker must be available for the Testcontainers integration suite.
 
 | Task | Command |
 |------|---------|
 | Start local API and database | `docker compose up --build` |
-| Compile API | `sbt api/compile` |
-| Run HTTP-to-PostgreSQL tests | `sbt integrationTests/test` |
+| Compile API | `deder exec -t compile -m api` |
+| Run HTTP-to-PostgreSQL tests | `deder exec -t test -m integration-tests` |
+| Build native executable | `deder exec -t graalvmNativeImage -m api` |
 | Apply local migrations | `sbt api/flywayMigrate` |
 | Regenerate database rows and DAOs | `sbt api/squeryGenerate` |
 | Regenerate server contracts and client | `sbt generateContracts` |
@@ -18,7 +19,7 @@
 ## Conventions
 
 - `openapi/petclinic.yaml` is the only API contract. Change it before regenerating `modules/api` and `modules/client` sources.
-- Database schema changes belong in `modules/api/src/main/resources/db/migration`; regenerate database rows and DAOs against PostgreSQL after table or column changes.
+- Database schema changes belong in `modules/api/src/main/resources/db/migration`; add filenames to `db/migration-index.txt` and regenerate database rows and DAOs against PostgreSQL after table or column changes.
 - Generated models, client code, database rows, and DAOs are committed. Review the diff after generation; the OpenAPI generator also touches controller scaffolding.
 - Keep controller code focused on HTTP validation, status codes, and mapping to API models. Put owner joins and transactions in `modules/api/src/main/scala/com/example/petclinic/db/daos/OwnersRepo.scala`.
 - Owner deletion uses `DELETE ... RETURNING`; the `pets.owner_id` foreign key restricts deletion when pets exist. Translate only that constraint violation to HTTP 409.
@@ -33,3 +34,4 @@
 | Local development and configuration | `README.md` |
 | Canonical API contract | `openapi/petclinic.yaml` |
 | Build modules and generator settings | `build.sbt` |
+| Deder modules and native build | `deder.pkl` |
